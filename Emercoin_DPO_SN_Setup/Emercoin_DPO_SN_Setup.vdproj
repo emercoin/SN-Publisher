@@ -145,6 +145,11 @@
             "AssemblyAsmDisplayName" = "8:Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_C9D6473A1B6D2ED63473057661A18C80"
+                    {
+                    "Name" = "8:Newtonsoft.Json.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:Newtonsoft.Json.dll"
             "TargetName" = "8:"
@@ -251,15 +256,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Emercoin DPO SN Publisher"
-        "ProductCode" = "8:{D9017C23-0F02-4D0C-A5E2-9740DA49194A}"
-        "PackageCode" = "8:{9B50B800-4DB7-4534-A684-33F2DD2FBDDB}"
+        "ProductCode" = "8:{C45C02EC-2DFA-47FE-A3C5-CFE6965BD8BA}"
+        "PackageCode" = "8:{29554509-2321-4FA6-B455-03930684DC55}"
         "UpgradeCode" = "8:{3CA508A3-786E-4D74-803B-58987C45D67D}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:1.0.8"
+        "ProductVersion" = "8:1.0.9"
         "Manufacturer" = "8:Emercoin"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"

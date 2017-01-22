@@ -11,21 +11,22 @@
     using System.Windows.Media;
     using Microsoft.Win32;
     using Newtonsoft.Json.Linq;
+    using EmercoinDPOSNP.SettingsWizard;
+    using EmercoinDPOSNP.AppSettings;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
-        private string rootDPOName;
-
         private Brush defaultColor = new SolidColorBrush(Colors.Black);
         private Brush errorColor = new SolidColorBrush(Colors.Red);
 
-        private string host;
-        private string port;
-        private string username;
-        private string password;
+        private Settings settings;
+        //private string host;
+        //private string port;
+        //private string username;
+        //private string password;
 
         private EmercoinWallet wallet;
 
@@ -39,10 +40,28 @@
             this.InitializeComponent();
             StatusTextBlock.Text = string.Empty;
 
-            this.rootDPOName = System.Configuration.ConfigurationManager.AppSettings["RootDPOName"];
-            if (string.IsNullOrEmpty(this.rootDPOName)) {
-                MessageBox.Show("Root DPO name is not configured!", AppUtils.AppName, MessageBoxButton.OK, MessageBoxImage.Error);
-                this.Close();
+            initialValidation();
+        }
+
+        private async void initialValidation()
+        {
+            //read settings and validate
+            try 
+            {
+                Settings.ReadSettings();
+                this.settings = Settings.Instance;
+                var valid = await checkConnection();
+                if (valid) 
+                {
+                    Settings.Instance.Validated = true;
+                    StatusTextBlock.Text = "Settings OK";
+                    StatusTextBlock.Foreground = this.defaultColor;
+                }
+            }
+            catch 
+            {
+                StatusTextBlock.Text = "Check settings";
+                StatusTextBlock.Foreground = this.errorColor;
             }
         }
 
@@ -59,25 +78,36 @@
 
         private bool validateConnectionSettings()
         {
-            this.host = HostText.Text;
+            if (settings == null) 
+            {
+                StatusTextBlock.Text = "Check settings";
+                StatusTextBlock.Foreground = this.errorColor;
+                return false;
+            }
+
             var validIpAddressRegex = new Regex(@"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$");
             var validHostnameRegex = new Regex(@"^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$");
-            if (!validHostnameRegex.IsMatch(this.host) && !validIpAddressRegex.IsMatch(this.host)) {
-                StatusTextBlock.Text = "Host is invalid";
+            if (!validHostnameRegex.IsMatch(this.settings.Host) && !validIpAddressRegex.IsMatch(this.settings.Host))
+            {
+                StatusTextBlock.Text = "Host is invalid. Check settings";
                 StatusTextBlock.Foreground = this.errorColor;
                 return false;
             }
 
-            this.port = PortNumberText.Text;
-            if (!portNumberTextAllowed(this.port)) {
-                PortNumberText.Focus();
-                StatusTextBlock.Text = "Port number is invalid";
+            if (!portNumberTextAllowed(this.settings.Port))
+            {
+                StatusTextBlock.Text = "Port number is invalid. Check settings";
                 StatusTextBlock.Foreground = this.errorColor;
                 return false;
             }
 
-            this.username = UsernameText.Text;
-            this.password = RpcPassword.Password;
+            if (string.IsNullOrWhiteSpace(this.settings.RootDPOName))
+            {
+                this.StatusTextBlock.Text = "Root DPO name is not configured. Check settings";
+                this.StatusTextBlock.Foreground = this.errorColor;
+                return false;
+            }
+
             StatusTextBlock.Text = string.Empty;
             return true;
         }
@@ -106,13 +136,13 @@
             }
 
             this.OperationProgress.IsIndeterminate = true;
-            SettingsTabs.IsEnabled = false;
+            defineSettingsBtn.IsEnabled = false;
 
             bool success = false;
             try {
-                this.wallet = new EmercoinWallet(this.host, this.port, this.username, this.password);
+                this.wallet = new EmercoinWallet(this.settings.Host, this.settings.Port, this.settings.Username, this.settings.Password);
                 string balance = await Task.Run(() => this.wallet.GetBalance());
-                this.wallet.LoadRootDPO(this.rootDPOName);
+                this.wallet.LoadRootDPO(this.settings.RootDPOName);
                 BalanceLabel.Content = "Balance: " + balance + " EMC";
                 StatusTextBlock.Text = "Connected successfully";
                 StatusTextBlock.Foreground = this.defaultColor;
@@ -125,7 +155,7 @@
             }
 
             this.OperationProgress.IsIndeterminate = false;
-            SettingsTabs.IsEnabled = true;
+            defineSettingsBtn.IsEnabled = true;
             return success;
         }
 
@@ -136,7 +166,7 @@
             int i = 0;
             foreach (string[] row in this.csv.Rows) {
                 string sn = row[0];
-                string name = this.rootDPOName + ":" + sn;
+                string name = this.settings.RootDPOName + ":" + sn;
 
                 // iterate through unique names
                 for (int j = 0; j < 100; j++) {
@@ -182,7 +212,7 @@
             int i = 0;
             foreach (string[] row in this.csv.Rows) {
                 string sn = row[0];
-                string name = this.rootDPOName + ":" + sn;
+                string name = this.settings.RootDPOName + ":" + sn;
 
                 for (int j = 0; j < 100; j++) {
                     string nameUnique = name + ":" + j.ToString(CultureInfo.InvariantCulture);
@@ -220,11 +250,6 @@
             return stats;
         }
 
-        private async void CheckConnectionBtn_Click(object sender, RoutedEventArgs e)
-        {
-            await this.checkConnection();
-        }
-
         private async void ReserveBtn_Click(object sender, RoutedEventArgs e)
         {
             bool success = await this.checkConnection();
@@ -235,7 +260,7 @@
             this.tokenSource = new CancellationTokenSource();
             CancellationToken ct = this.tokenSource.Token;
             CancelBtn.IsEnabled = true;
-            SettingsTabs.IsEnabled = false;
+            defineSettingsBtn.IsEnabled = false;
 
             // The Progress<T> constructor captures our UI context, so the lambda will be run on the UI thread.
             var progress = new Progress<int>(percent =>
@@ -263,7 +288,7 @@
             }
             ProgressLabel.Content = string.Empty;
 
-            SettingsTabs.IsEnabled = true;
+            defineSettingsBtn.IsEnabled = true;
             CancelBtn.IsEnabled = false;
             this.tokenSource.Dispose();
 
@@ -285,7 +310,7 @@
             this.tokenSource = new CancellationTokenSource();
             CancellationToken ct = this.tokenSource.Token;
             CancelBtn.IsEnabled = true;
-            SettingsTabs.IsEnabled = false;
+            defineSettingsBtn.IsEnabled = false;
 
             // The Progress<T> constructor captures our UI context, so the lambda will be run on the UI thread.
             var progress = new Progress<int>(percent =>
@@ -313,7 +338,7 @@
             }
             ProgressLabel.Content = string.Empty;
 
-            SettingsTabs.IsEnabled = true;
+            defineSettingsBtn.IsEnabled = true;
             CancelBtn.IsEnabled = false;
             this.tokenSource.Dispose();
 
@@ -402,6 +427,26 @@
         {
             public int Processed;
             public int Signed;
+        }
+
+        private void defineSettingsBtn_Click(object sender, RoutedEventArgs e)
+        {
+            var wizardFrm = new SettingsWizardWindow();
+            wizardFrm.Owner = this;
+            wizardFrm.Top = this.Top + 20;
+            wizardFrm.Left = this.Left + 20;
+
+            wizardFrm.ShowDialog();
+            if (Settings.Instance.Validated) 
+            {
+                StatusTextBlock.Text = "Settings OK";
+                StatusTextBlock.Foreground = this.defaultColor;
+            }
+            else
+            {
+                StatusTextBlock.Text = "Settings are invalid";
+                StatusTextBlock.Foreground = this.errorColor;
+            }
         }
     }
 }
