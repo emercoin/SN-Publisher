@@ -45,6 +45,7 @@ namespace EmercoinDPOSNP.SettingsWizard
             // анализируем выбор на странице
             // принимаем решение какое действие предпринять (вызов метода, переход к странице)
 
+            // Окно выбора режима подключения
             if (frame1.Content is ConnectionModePage) 
             {
                 conModePage = (ConnectionModePage)this.frame1.Content;
@@ -52,6 +53,7 @@ namespace EmercoinDPOSNP.SettingsWizard
                 {
                     var localModePage = new LocalModePage();
                     this.frame1.Content = localModePage;
+                    this.nextBtn.Content = "Finish";
                 }
                 else if (conModePage.RemoteWalletBtn.IsChecked.Value)
                 {
@@ -69,6 +71,7 @@ namespace EmercoinDPOSNP.SettingsWizard
                     this.frame1.Content = this.defineSettingsPage;
                 }
             }
+            // Окно записи настроек
             else if (frame1.Content is DefineSettingsPage) 
             {
                 // Check settings
@@ -88,6 +91,42 @@ namespace EmercoinDPOSNP.SettingsWizard
                         this.DialogResult = true;
                     }
                 }
+            }
+            else if (frame1.Content is LocalModePage) 
+            {
+                // проверяем установлено ли app
+                var wi = WalletInstallInfo.GetInfo();
+                if (wi != null)
+                {
+                    // TODO: Устанавливается только под пользователя а не на всю машину?
+                    var walletPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\" + "Emercoin" + "\\emercoin.conf";
+                    var confManager = new EmercoinConfigManager(walletPath);
+                    var conf = confManager.ReadConfig();
+
+                    //if (conf.GetParameterValue(EmercoinConfig.serverParam) != "1")
+                    //{
+                    confManager.FixToActive(conf);
+
+                    Settings.Instance.RootDPOName = "myname";
+                    Settings.Instance.Host = "localhost";
+                    Settings.Instance.Port = conf.GetParameterValue(EmercoinConfig.portParam) ?? string.Empty;
+                    Settings.Instance.Username = conf.GetParameterValue(EmercoinConfig.userParam) ?? string.Empty;
+                    Settings.Instance.Password = conf.GetParameterValue(EmercoinConfig.passwordParam) ?? string.Empty;
+                    Settings.WriteSettings();
+
+                    confManager.WriteConfig(conf, walletPath);
+
+                    //}
+                }
+                else 
+                {
+                    throw new Exception("There'are no Emercoin Core instances installed on the local machine");
+                }
+
+                // Check settings
+                this.connectionChecked = await checkConnection();
+                Settings.Instance.Validated = this.connectionChecked;
+                this.DialogResult = true;
             }
         }
 

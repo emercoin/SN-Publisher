@@ -6,8 +6,8 @@
       mc:Ignorable="d" 
       d:DesignHeight="300" d:DesignWidth="300"
 	Title="localModePage">
-
+    
     <Grid>
-        
+        <TextBlock HorizontalAlignment="Left" Margin="20,20,20,0" TextWrapping="Wrap" Text="System will now automatically (re)set connection parameters. During this process you wallet may restart up to several times..." VerticalAlignment="Top"/>
     </Grid>
 </Page>

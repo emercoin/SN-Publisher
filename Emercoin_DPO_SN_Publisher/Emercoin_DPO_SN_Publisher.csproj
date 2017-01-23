@@ -73,12 +73,15 @@
     <Compile Include="SettingsWizard\DefineSettingsPage.xaml.cs">
       <DependentUpon>DefineSettingsPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="SettingsWizard\EmercoinWalletInfo.cs" />
     <Compile Include="SettingsWizard\LocalModePage.xaml.cs">
       <DependentUpon>LocalModePage.xaml</DependentUpon>
     </Compile>
     <Compile Include="SettingsWizard\SettingsWizardWindow.xaml.cs">
       <DependentUpon>SettingsWizardWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="EmercoinConfig.cs" />
+    <Compile Include="EmercoinConfigManager.cs" />
     <Page Include="ExceptionViewer.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

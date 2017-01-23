@@ -9,8 +9,8 @@
       Name="connectionModePage">
 
     <Grid>
-        <RadioButton IsEnabled="False" Name="localWalletBtn" Content="Local wallet" HorizontalAlignment="Left" Margin="20,100,0,0" VerticalAlignment="Top"/>
-        <RadioButton IsChecked="True" Name="RemoteWalletBtn" Content="Remote wallet" HorizontalAlignment="Left" Margin="20,69,0,0" VerticalAlignment="Top"/>
+        <RadioButton IsChecked="True" Name="localWalletBtn" Content="Local wallet" HorizontalAlignment="Left" Margin="20,70,0,0" VerticalAlignment="Top"/>
+        <RadioButton Name="RemoteWalletBtn" Content="Remote wallet" HorizontalAlignment="Left" Margin="20,100,0,0" VerticalAlignment="Top"/>
         <TextBlock HorizontalAlignment="Left" Margin="20,20,20,0" TextWrapping="Wrap" Text="Please choose a mode of connection to Emercoin wallet:" VerticalAlignment="Top"/>
     </Grid>
 </Page>
