@@ -82,6 +82,7 @@
     </Compile>
     <Compile Include="EmercoinConfig.cs" />
     <Compile Include="EmercoinConfigManager.cs" />
+    <Compile Include="SettingsWizard\WalletClient.cs" />
     <Page Include="ExceptionViewer.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.Linq;
     using System.Text.RegularExpressions;
     using System.Threading;
     using System.Threading.Tasks;
@@ -13,6 +14,7 @@
     using Newtonsoft.Json.Linq;
     using EmercoinDPOSNP.SettingsWizard;
     using EmercoinDPOSNP.AppSettings;
+    using System.Diagnostics;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -23,10 +25,6 @@
         private Brush errorColor = new SolidColorBrush(Colors.Red);
 
         private Settings settings;
-        //private string host;
-        //private string port;
-        //private string username;
-        //private string password;
 
         private EmercoinWallet wallet;
 
@@ -40,10 +38,11 @@
             this.InitializeComponent();
             StatusTextBlock.Text = string.Empty;
 
-            initialValidation();
+            //startWalletIfLocal();
+            //initialValidation();
         }
 
-        private async void initialValidation()
+        private async Task initialValidation()
         {
             //read settings and validate
             try 
@@ -62,6 +61,25 @@
             {
                 StatusTextBlock.Text = "Check settings";
                 StatusTextBlock.Foreground = this.errorColor;
+            }
+            finally 
+            {
+                this.Activate();
+            }
+        }
+
+        private async Task startWalletIfLocal() 
+        {
+            var walletApps = WalletInstallInfo.GetInfo();
+            var wi = walletApps.OrderBy(i => i.Version).ThenBy(i => i.Bitness).Last();
+
+            if (Settings.Instance.HostIsLocal()) 
+            {
+                if (wi != null && !wi.IsExecuting())
+                {
+                    Process.Start(wi.FilePath);
+                    await Task.Delay(15000);
+                }
             }
         }
 
@@ -447,6 +465,12 @@
                 StatusTextBlock.Text = "Settings are invalid";
                 StatusTextBlock.Foreground = this.errorColor;
             }
+        }
+
+        private async void AppWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            await startWalletIfLocal();
+            await initialValidation();
         }
     }
 }

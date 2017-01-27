@@ -51,36 +51,52 @@
         private string post(string postData)
         {
             HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(this.url);
-            request.AllowAutoRedirect = true;
-            request.Method = "POST";
-            request.UserAgent = "Emercoin DPO SN Publisher";
+            request.KeepAlive = false;
+            try 
+            {
+                request.AllowAutoRedirect = true;
+                request.Method = "POST";
+                request.UserAgent = "Emercoin DPO SN Publisher";
 
-            request.PreAuthenticate = true;
-            string encoded = System.Convert.ToBase64String(System.Text.Encoding.GetEncoding("ISO-8859-1").GetBytes(this.username + ":" + this.password));
-            request.Headers.Add("Authorization", "Basic " + encoded);
+                request.PreAuthenticate = true;
+                string encoded = System.Convert.ToBase64String(System.Text.Encoding.GetEncoding("ISO-8859-1").GetBytes(this.username + ":" + this.password));
+                request.Headers.Add("Authorization", "Basic " + encoded);
 
-            string proxyUrl = System.Configuration.ConfigurationManager.AppSettings["DebugProxy"];
-            if (proxyUrl != null) {
-                request.Proxy = new WebProxy(proxyUrl);
-                request.Proxy.Credentials = CredentialCache.DefaultNetworkCredentials;
+                string proxyUrl = System.Configuration.ConfigurationManager.AppSettings["DebugProxy"];
+                if (proxyUrl != null)
+                {
+                    request.Proxy = new WebProxy(proxyUrl);
+                    request.Proxy.Credentials = CredentialCache.DefaultNetworkCredentials;
+                }
+
+                var encoding = new System.Text.UTF8Encoding();
+                byte[] requestBuffer = encoding.GetBytes(postData);
+
+                request.ContentLength = requestBuffer.Length;
+                request.ContentType = @"application/json";
+
+                using (Stream requestStream = request.GetRequestStream())
+                {
+                    requestStream.Write(requestBuffer, 0, requestBuffer.Length);
+                }
+
+                using (WebResponse response = request.GetResponse())
+                {
+                    byte[] responseBuffer = new byte[response.ContentLength];
+                    using (Stream responseStream = response.GetResponseStream())
+                    {
+                        responseStream.Read(responseBuffer, 0, (int)response.ContentLength);
+                        responseStream.Close();
+                    }
+
+                    return encoding.GetString(responseBuffer);
+                }
             }
-
-            var encoding = new System.Text.UTF8Encoding();
-            byte[] requestBuffer = encoding.GetBytes(postData);
-
-            request.ContentLength = requestBuffer.Length;
-            request.ContentType = @"application/json";
-
-            using (Stream requestStream = request.GetRequestStream()) {
-                requestStream.Write(requestBuffer, 0, requestBuffer.Length);
+            catch { throw; }
+            finally 
+            {
+                request.Abort();
             }
-            
-            WebResponse response = request.GetResponse();
-            byte[] responseBuffer = new byte[response.ContentLength];
-            using (Stream responseStream = response.GetResponseStream()) {
-                responseStream.Read(responseBuffer, 0, (int)response.ContentLength);
-            }
-            return encoding.GetString(responseBuffer);
         }
     }
 

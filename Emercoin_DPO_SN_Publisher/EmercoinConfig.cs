@@ -47,6 +47,22 @@ namespace EmercoinDPOSNP
                 paramObj.Enabled = true;
             }
         }
+
+        public bool ValidateParameters(string port, string username, string password)
+        {
+            string server = this.GetParameterValue(EmercoinConfig.serverParam) ?? string.Empty;
+            string listen = this.GetParameterValue(EmercoinConfig.serverParam) ?? string.Empty;
+
+            string confPort = this.GetParameterValue(EmercoinConfig.portParam) ?? string.Empty;
+            string confUsername = this.GetParameterValue(EmercoinConfig.userParam) ?? string.Empty;
+            string confPassword = this.GetParameterValue(EmercoinConfig.passwordParam) ?? string.Empty;
+
+            var portequal = string.Equals(port, confPort);
+            var usernameequal = string.Equals(username, confUsername);
+            var passwordequal = string.Equals(password, confPassword);
+            //&& (listen != "0")
+            return (server == "1")  && portequal && usernameequal && passwordequal;
+        }
     }
 
     public class EmercoinConfigValue 

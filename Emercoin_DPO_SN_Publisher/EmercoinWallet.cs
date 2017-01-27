@@ -9,7 +9,7 @@
     using System.Threading.Tasks;
     using Newtonsoft.Json.Linq;
 
-    internal class EmercoinWallet
+    public class EmercoinWallet
     {
         private JsonRpcClient client;
         private string rootDpoAddress;

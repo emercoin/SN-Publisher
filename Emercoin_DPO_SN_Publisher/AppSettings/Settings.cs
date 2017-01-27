@@ -13,6 +13,15 @@ namespace EmercoinDPOSNP.AppSettings
     {
         private Settings() 
         {
+            this.RootDPOName = string.Empty;
+            this.Host = "localhost";
+            this.Port = "6662";
+            this.Username = string.Empty;
+            this.Password = string.Empty;
+        }
+
+        private Settings(bool loadDefaults) 
+        {
             this.RootDPOName = "myname";
             this.Host = "localhost";
             this.Port = "6662";
@@ -72,7 +81,7 @@ namespace EmercoinDPOSNP.AppSettings
             }
             catch (Exception ex)
             {
-                throw new Exception("Exception while loading application settings: {0}", ex);
+                //throw new Exception("Exception while loading application settings: {0}", ex);
             }
         }
 
@@ -95,6 +104,12 @@ namespace EmercoinDPOSNP.AppSettings
             {
                 throw new Exception("Exception while saving application settings: {0}", ex);
             }
+        }
+
+        public bool HostIsLocal() 
+        {
+            string[] localAddresses = {"localhost", "192.168.0.1"};
+            return localAddresses.Contains(this.Host, StringComparer.InvariantCultureIgnoreCase);
         }
 
         public string Host { get; set; }

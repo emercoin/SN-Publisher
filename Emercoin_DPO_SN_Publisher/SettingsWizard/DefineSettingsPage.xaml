@@ -20,12 +20,8 @@
             </TextBox.BindingGroup>
         </TextBox>
         <PasswordBox x:Name="RpcPassword" HorizontalAlignment="Left" Margin="123,139,0,0" VerticalAlignment="Top" Width="249" Height="23"/>
-        <StatusBar Margin="0,0,0,0" VerticalAlignment="Bottom" Height="28" BorderThickness="0,1,0,0" BorderBrush="Gray">
-            <ProgressBar x:Name="OperationProgress" HorizontalAlignment="Right" VerticalAlignment="Center" Width="390" Height="20"/>
-        </StatusBar>
         <TextBlock HorizontalAlignment="Left" Margin="20,20,0,0" TextWrapping="Wrap" Text="Please provide values for the following settings:" VerticalAlignment="Top"/>
         <Label Content="Root DPO Name" HorizontalAlignment="Left" Margin="20,167,0,0" VerticalAlignment="Top"/>
         <TextBox x:Name="RootDPONameText" HorizontalAlignment="Left" Margin="123,167,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="249" Text="myname" Height="23"/>
-        <TextBlock x:Name="StatusTextBlock" TextWrapping="Wrap" Text="..." HorizontalAlignment="Left" Margin="20,254,0,33"/>
     </Grid>
 </Page>
