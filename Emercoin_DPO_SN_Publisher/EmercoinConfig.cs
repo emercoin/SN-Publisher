@@ -11,7 +11,7 @@ namespace EmercoinDPOSNP
         public const string serverParam = "server";
         public const string listenParam = "listen";
         public const string userParam = "rpcuser";
-        public const string passwordParam = "rpcpassword";
+        public const string rpcPasswordParam = "rpcpassword";
         public const string debugParam = "debug";
         public const string portParam = "port";
 
@@ -55,7 +55,7 @@ namespace EmercoinDPOSNP
 
             string confPort = this.GetParameterValue(EmercoinConfig.portParam) ?? string.Empty;
             string confUsername = this.GetParameterValue(EmercoinConfig.userParam) ?? string.Empty;
-            string confPassword = this.GetParameterValue(EmercoinConfig.passwordParam) ?? string.Empty;
+            string confPassword = this.GetParameterValue(EmercoinConfig.rpcPasswordParam) ?? string.Empty;
 
             var portequal = string.Equals(port, confPort);
             var usernameequal = string.Equals(username, confUsername);

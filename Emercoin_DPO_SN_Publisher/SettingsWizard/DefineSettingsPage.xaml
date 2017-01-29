@@ -23,5 +23,7 @@
         <TextBlock HorizontalAlignment="Left" Margin="20,20,0,0" TextWrapping="Wrap" Text="Please provide values for the following settings:" VerticalAlignment="Top"/>
         <Label Content="Root DPO Name" HorizontalAlignment="Left" Margin="20,167,0,0" VerticalAlignment="Top"/>
         <TextBox x:Name="RootDPONameText" HorizontalAlignment="Left" Margin="123,167,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="249" Text="myname" Height="23"/>
+        <Label Content="Wallet password" HorizontalAlignment="Left" Margin="20,195,0,0" VerticalAlignment="Top"/>
+        <PasswordBox x:Name="WalletPassphrase" HorizontalAlignment="Left" Margin="123,195,0,0" VerticalAlignment="Top" Width="249" Height="23"/>
     </Grid>
 </Page>

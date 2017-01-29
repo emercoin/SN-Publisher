@@ -26,6 +26,36 @@
             Created
         }
 
+        public async Task<bool> CheckConnection(string rootDpoName)
+        {
+            bool success = false;
+
+            string balance = await Task.Run(() => this.GetBalance());
+            await Task.Run(() => this.LoadRootDPO(rootDpoName));
+
+            success = true;
+            return success;
+        }
+
+        public async Task<bool> CheckWalletPassphrase(string passphrase) 
+        {
+            bool success = false;
+
+            try
+            {
+                await Task.Run(() => this.LockWallet());
+                await Task.Run(() => this.UnlockWallet(passphrase, 100000));
+                GetInfoResult info = await Task.Delay(2000).ContinueWith<GetInfoResult>((t) => this.GetWalletInfo());
+                success = !info.locked;
+            }
+            catch (Exception ex)
+            {
+                success = false;
+            }
+
+            return success;
+        }
+
         public string GetBalance()
         {
             var command = new JObject();
@@ -36,6 +66,27 @@
                 return result["result"]["balance"].ToObject<string>();
             }
             catch (JsonRpcException ex) {
+                throw new EmercoinWalletException("Could not get wallet balance", ex);
+            }
+        }
+
+        public GetInfoResult GetWalletInfo()
+        {
+            var command = new JObject();
+            command["method"] = "getinfo";
+
+            try
+            {
+                JObject resJson = this.client.SendCommand(command);
+                var res = resJson["result"];
+                string balance = res["balance"].ToObject<string>();
+                string errors = res["errors"].ToObject<string>();
+                bool locked = string.Equals(errors, "Info: Minting suspended due to locked wallet.", StringComparison.InvariantCultureIgnoreCase);
+
+                return new GetInfoResult() { balance = balance, locked = locked };
+            }
+            catch (JsonRpcException ex)
+            {
                 throw new EmercoinWalletException("Could not get wallet balance", ex);
             }
         }
@@ -106,6 +157,37 @@
             }
             catch (JsonRpcException ex) {
                 throw new EmercoinWalletException("Could not name_update", ex);
+            }
+        }
+
+        public void UnlockWallet(string passPhrase, int timeout)
+        {
+            var command = new JObject();
+            command["method"] = "walletpassphrase";
+            command["params"] = new JArray() { passPhrase, timeout };
+
+            try
+            {
+                JObject response = this.client.SendCommand(command);
+            }
+            catch (JsonRpcException ex)
+            {
+                throw new EmercoinWalletException("Could not walletpassphrase", ex);
+            }
+        }
+
+        public void LockWallet()
+        {
+            var command = new JObject();
+            command["method"] = "walletlock";
+
+            try
+            {
+                JObject response = this.client.SendCommand(command);
+            }
+            catch (JsonRpcException ex)
+            {
+                throw new EmercoinWalletException("Could not walletlock", ex);
             }
         }
 

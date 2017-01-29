@@ -9,27 +9,15 @@ namespace EmercoinDPOSNP.SettingsWizard
 {
     public class WalletClient
     {
-        private string rootDPOName;
-        private string host;
-        private string port;
-        private string username;
-        private string password;
-
         private EmercoinWallet wallet;
 
         public async Task<bool> checkConnection(string host, string port, string username, string password, string rootDPOName)
         {
             bool success = false;
-            
-            this.host = host;
-            this.port = port;
-            this.username = username;
-            this.password = password;
-            this.rootDPOName = rootDPOName;
 
-            this.wallet = new EmercoinWallet(this.host, this.port, this.username, this.password);
+            this.wallet = new EmercoinWallet(host, port, username, password);
             string balance = await Task.Run(() => this.wallet.GetBalance());
-            await Task.Run(() => this.wallet.LoadRootDPO(this.rootDPOName));
+            await Task.Run(() => this.wallet.LoadRootDPO(rootDPOName));
             
             success = true;
             

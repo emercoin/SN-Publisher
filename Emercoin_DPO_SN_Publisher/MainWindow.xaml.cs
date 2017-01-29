@@ -37,9 +37,6 @@
         {
             this.InitializeComponent();
             StatusTextBlock.Text = string.Empty;
-
-            //startWalletIfLocal();
-            //initialValidation();
         }
 
         private async Task initialValidation()
@@ -49,12 +46,45 @@
             {
                 Settings.ReadSettings();
                 this.settings = Settings.Instance;
-                var valid = await checkConnection();
-                if (valid) 
+                var connectionOk = await checkConnection();
+                if (connectionOk) 
                 {
-                    Settings.Instance.Validated = true;
                     StatusTextBlock.Text = "Settings OK";
                     StatusTextBlock.Foreground = this.defaultColor;
+                }
+                else 
+                {
+                    return;
+                }
+
+                // unlock wallet if needed
+                bool walletLocked = false;
+                try
+                {
+                    var wallet = new EmercoinWallet(Settings.Instance.Host, Settings.Instance.Port, Settings.Instance.Username, Settings.Instance.RpcPassword);
+                    var walletInfo = await Task.Run(() => wallet.GetWalletInfo());
+
+                    walletLocked = (walletInfo != null && walletInfo.locked);
+                }
+                catch (EmercoinWalletException ex)
+                {
+                    StatusTextBlock.Text = "Error while checking lock";
+                    StatusTextBlock.Foreground = this.errorColor;
+                    AppUtils.ShowException(ex, this);
+                }
+
+                try
+                {
+                    if (walletLocked)
+                    {
+                        await Task.Run(() => wallet.UnlockWallet(Settings.Instance.WalletPassphrase, 100000));
+                    }
+                }
+                catch (EmercoinWalletException ex)
+                {
+                    StatusTextBlock.Text = "Error while unlocking wallet";
+                    StatusTextBlock.Foreground = this.errorColor;
+                    AppUtils.ShowException(ex, this);
                 }
             }
             catch 
@@ -158,7 +188,7 @@
 
             bool success = false;
             try {
-                this.wallet = new EmercoinWallet(this.settings.Host, this.settings.Port, this.settings.Username, this.settings.Password);
+                this.wallet = new EmercoinWallet(this.settings.Host, this.settings.Port, this.settings.Username, this.settings.RpcPassword);
                 string balance = await Task.Run(() => this.wallet.GetBalance());
                 this.wallet.LoadRootDPO(this.settings.RootDPOName);
                 BalanceLabel.Content = "Balance: " + balance + " EMC";
@@ -454,16 +484,28 @@
             wizardFrm.Top = this.Top + 20;
             wizardFrm.Left = this.Left + 20;
 
-            wizardFrm.ShowDialog();
-            if (Settings.Instance.Validated) 
-            {
-                StatusTextBlock.Text = "Settings OK";
-                StatusTextBlock.Foreground = this.defaultColor;
+            bool? dlgResult = null;
+            try { 
+                dlgResult = wizardFrm.ShowDialog(); 
             }
-            else
+            catch (Exception ex)
             {
-                StatusTextBlock.Text = "Settings are invalid";
-                StatusTextBlock.Foreground = this.errorColor;
+                AppUtils.ShowException(ex, this);
+            }
+
+            // if dialog not canceled
+            if (dlgResult == true) 
+            {
+                if (wizardFrm != null && wizardFrm.Success)
+                {
+                    StatusTextBlock.Text = "Settings OK";
+                    StatusTextBlock.Foreground = this.defaultColor;
+                }
+                else
+                {
+                    StatusTextBlock.Text = "Settings are not configured successfuly";
+                    StatusTextBlock.Foreground = this.errorColor;
+                }
             }
         }
 

@@ -17,7 +17,8 @@ namespace EmercoinDPOSNP.AppSettings
             this.Host = "localhost";
             this.Port = "6662";
             this.Username = string.Empty;
-            this.Password = string.Empty;
+            this.RpcPassword = string.Empty;
+            this.WalletPassphrase = string.Empty;
         }
 
         private Settings(bool loadDefaults) 
@@ -26,7 +27,8 @@ namespace EmercoinDPOSNP.AppSettings
             this.Host = "localhost";
             this.Port = "6662";
             this.Username = "rpcemc";
-            this.Password = string.Empty;
+            this.RpcPassword = string.Empty;
+            this.WalletPassphrase = string.Empty;
         }
 
         private static Settings settings { get; set; }
@@ -115,10 +117,34 @@ namespace EmercoinDPOSNP.AppSettings
         public string Host { get; set; }
         public string Port { get; set; }
         public string Username { get; set; }
-        public string Password { get; set; }
+        public string RpcPassword { get; set; }
         public string RootDPOName { get; set; }
+        public string WalletPassphraseEncoded { get; set; }
 
         [XmlIgnore]
-        public bool Validated { get; set; }
+        public string WalletPassphrase 
+        {
+            get
+            {
+                string encStr = string.Empty;
+                if (!string.IsNullOrEmpty(this.WalletPassphraseEncoded))
+                {
+                    encStr = Encryption.DecryptString_Aes(this.WalletPassphraseEncoded);
+                }
+                return encStr;
+            }
+
+            set
+            {
+                if (!string.IsNullOrEmpty(value))
+                {
+                    this.WalletPassphraseEncoded = Encryption.EncryptString_Aes(value);
+                }
+                else 
+                {
+                    this.WalletPassphraseEncoded = string.Empty;
+                }
+            }
+        }
     }
 }

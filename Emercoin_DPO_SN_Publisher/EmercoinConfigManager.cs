@@ -24,7 +24,7 @@ namespace EmercoinDPOSNP
         private string[] supportedParams = new string[] 
         { 
             EmercoinConfig.serverParam, EmercoinConfig.listenParam, EmercoinConfig.userParam, 
-            EmercoinConfig.passwordParam, EmercoinConfig.debugParam, EmercoinConfig.portParam
+            EmercoinConfig.rpcPasswordParam, EmercoinConfig.debugParam, EmercoinConfig.portParam
         };
 
         public EmercoinConfigManager(string filePath) 
@@ -63,7 +63,7 @@ namespace EmercoinDPOSNP
             config.SetParameter(EmercoinConfig.serverParam, "1");
             config.SetParameter(EmercoinConfig.listenParam, "1");
             config.SetParameter(EmercoinConfig.userParam, "rpcemc");
-            config.SetParameter(EmercoinConfig.passwordParam, randomString(6));
+            config.SetParameter(EmercoinConfig.rpcPasswordParam, randomString(6));
             config.SetParameter(EmercoinConfig.debugParam, "rpc");
             config.SetParameter(EmercoinConfig.portParam, "6662");
         }
