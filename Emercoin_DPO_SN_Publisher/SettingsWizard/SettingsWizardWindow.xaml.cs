@@ -1,23 +1,23 @@
-﻿using EmercoinDPOSNP.AppSettings;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-
-namespace EmercoinDPOSNP.SettingsWizard
+﻿namespace EmercoinDPOSNP.SettingsWizard
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Linq;
+    using System.Text;
+    using System.Text.RegularExpressions;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using System.Windows;
+    using System.Windows.Controls;
+    using System.Windows.Data;
+    using System.Windows.Documents;
+    using System.Windows.Input;
+    using System.Windows.Media;
+    using System.Windows.Media.Imaging;
+    using System.Windows.Shapes;
+    using EmercoinDPOSNP.AppSettings;
+
     /// <summary>
     /// Interaction logic for SettingsWizardWindow.xaml
     /// </summary>
@@ -34,7 +34,7 @@ namespace EmercoinDPOSNP.SettingsWizard
 
         public SettingsWizardWindow()
         {
-            InitializeComponent();
+            this.InitializeComponent();
 
             this.success = false;
             this.conModePage = new ConnectionModePage();
@@ -53,11 +53,40 @@ namespace EmercoinDPOSNP.SettingsWizard
             }
         }
 
+        // TODO: is the method used?
+        public async Task<bool> checkConnectionWithUI(string host, string port, string username, string password, string rootDPOName)
+        {
+            this.OperationProgress.IsIndeterminate = true;
+            bool success = false;
+            try {
+                var wallet = new EmercoinWallet(host, port, username, password);
+                string balance = await Task.Run(() => wallet.GetBalance());
+                wallet.LoadRootDPO(rootDPOName);
+                success = true;
+
+                this.StatusTextBlock.Text = "Connected successfully";
+                this.StatusTextBlock.Foreground = this.defaultColor;
+            }
+            catch (EmercoinWalletException ex) {
+                AppUtils.ShowException(ex, this);
+                this.StatusTextBlock.Text = "Connection failed";
+                this.StatusTextBlock.Foreground = this.errorColor;
+            }
+            this.OperationProgress.IsIndeterminate = false;
+            return success;
+        }
+
+        private static bool portNumberTextAllowed(string text)
+        {
+            Regex regex = new Regex("[0-9]{1,5}");
+            return regex.IsMatch(text);
+        }
+
         private void connectionModeLogic() 
         {
             var settings = Settings.Instance;
-            conModePage = (ConnectionModePage)this.frame1.Content;
-            if (conModePage.localWalletBtn.IsChecked.Value)
+            this.conModePage = (ConnectionModePage)this.frame1.Content;
+            if (this.conModePage.localWalletBtn.IsChecked.Value)
             {
                 this.frame1.Content = this.localModePage;
                 this.nextBtn.Content = "Finish";
@@ -65,7 +94,7 @@ namespace EmercoinDPOSNP.SettingsWizard
                 this.localModePage.RootDPONameTextLocal.Text = settings.RootDPOName;
                 this.localModePage.WalletPassphraseLocal.Password = settings.WalletPassphrase;
             }
-            else if (conModePage.RemoteWalletBtn.IsChecked.Value)
+            else if (this.conModePage.RemoteWalletBtn.IsChecked.Value)
             {
                 if (settings != null)
                 {
@@ -114,7 +143,7 @@ namespace EmercoinDPOSNP.SettingsWizard
                 var wallet = new EmercoinWallet(Settings.Instance.Host, Settings.Instance.Port, Settings.Instance.Username, Settings.Instance.RpcPassword);
                 var walletInfo = await Task.Run(() => wallet.GetWalletInfo());
 
-                walletLocked = ((walletInfo != null && walletInfo.locked) || !string.IsNullOrEmpty(this.remoteSettingsPage.WalletPassphrase.Password));
+                walletLocked = (walletInfo != null && walletInfo.locked) || !string.IsNullOrEmpty(this.remoteSettingsPage.WalletPassphrase.Password);
                 if (walletLocked)
                 {
                     pwdChecked = await wallet.CheckWalletPassphrase(this.remoteSettingsPage.WalletPassphrase.Password);
@@ -138,15 +167,15 @@ namespace EmercoinDPOSNP.SettingsWizard
 
             if (this.success)
             {
-                SaveSettingsFromUI();
+                this.saveSettingsFromUI();
                 this.DialogResult = true;
             }
             else
             {
-                var mbResult = MessageBox.Show(this, "Settings error. Save settings anyway?", "Save settings", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                if (mbResult == MessageBoxResult.Yes)
+                var promptResult = MessageBox.Show(this, "Settings error. Save settings anyway?", "Save settings", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (promptResult == MessageBoxResult.Yes)
                 {
-                    SaveSettingsFromUI();
+                    this.saveSettingsFromUI();
                     this.DialogResult = true;
                 }
             }
@@ -171,7 +200,7 @@ namespace EmercoinDPOSNP.SettingsWizard
 
             // check emercoin config if correspondes to publisher settings
             bool configValid = conf.ValidateParameters(Settings.Instance.Port, Settings.Instance.Username, Settings.Instance.RpcPassword);
-            bool settingsValid = validateSettings(Settings.Instance.Host, Settings.Instance.Port, Settings.Instance.RootDPOName, Settings.Instance.Username, Settings.Instance.RpcPassword);
+            bool settingsValid = this.validateSettings(Settings.Instance.Host, Settings.Instance.Port, Settings.Instance.RootDPOName, Settings.Instance.Username, Settings.Instance.RpcPassword);
             bool dpoNameChanged = !string.Equals(this.localModePage.RootDPONameTextLocal.Text, Settings.Instance.RootDPOName, StringComparison.InvariantCultureIgnoreCase);
 
             if (!configValid || !settingsValid)
@@ -204,11 +233,12 @@ namespace EmercoinDPOSNP.SettingsWizard
                 {
                     connectionOk = await wallet.CheckConnection(this.localModePage.RootDPONameTextLocal.Text);
                 }
-                catch (EmercoinWalletException ex) {}
+                catch (EmercoinWalletException ex) {
+                }
 
                 if (!connectionOk)
                 {
-                    walletClose(walletApp);
+                    this.walletClose(walletApp);
                     
                     // wait and start wallet
                     Action<Task> startNewWallet = (t) =>
@@ -256,7 +286,7 @@ namespace EmercoinDPOSNP.SettingsWizard
                 var wallet = new EmercoinWallet(Settings.Instance.Host, Settings.Instance.Port, Settings.Instance.Username, Settings.Instance.RpcPassword);
                 var walletInfo = await Task.Run(() => wallet.GetWalletInfo());
 
-                walletLocked = ((walletInfo != null && walletInfo.locked) || !string.IsNullOrEmpty(this.localModePage.WalletPassphraseLocal.Password));
+                walletLocked = (walletInfo != null && walletInfo.locked) || !string.IsNullOrEmpty(this.localModePage.WalletPassphraseLocal.Password);
                 if (walletLocked) 
                 {
                     pwdChecked = await wallet.CheckWalletPassphrase(this.localModePage.WalletPassphraseLocal.Password);
@@ -287,7 +317,7 @@ namespace EmercoinDPOSNP.SettingsWizard
             try 
             {
                 Settings.ReadSettings();
-                closeDisabled = true;
+                this.closeDisabled = true;
                 this.success = false;
                 this.nextBtn.IsEnabled = false;
                 this.cancelBtn.IsEnabled = false;
@@ -296,7 +326,7 @@ namespace EmercoinDPOSNP.SettingsWizard
                 // check type of the current page on which logic depends
                 if (frame1.Content is ConnectionModePage)
                 {
-                    connectionModeLogic();
+                    this.connectionModeLogic();
                     this.closeDisabled = false;
                 }
                 else if (frame1.Content is DefineSettingsPage)
@@ -305,16 +335,16 @@ namespace EmercoinDPOSNP.SettingsWizard
 
                     if (controlsValid) 
                     {
-                        await remoteSettingsLogic();
+                        await this.remoteSettingsLogic();
                     }
                 }
                 else if (frame1.Content is LocalModePage)
                 {
-                    controlsValid = validateLocalSettingsPage();
+                    controlsValid = this.validateLocalSettingsPage();
 
                     if (controlsValid) 
                     {
-                        await localModeLogic();
+                        await this.localModeLogic();
                         this.Activate();
                         this.OperationProgress.IsIndeterminate = false;
                         this.closeDisabled = false;
@@ -329,7 +359,7 @@ namespace EmercoinDPOSNP.SettingsWizard
             }
             finally 
             {
-                closeDisabled = false;
+                this.closeDisabled = false;
                 this.OperationProgress.IsIndeterminate = false;
                 this.nextBtn.IsEnabled = true;
                 this.cancelBtn.IsEnabled = true;
@@ -348,12 +378,13 @@ namespace EmercoinDPOSNP.SettingsWizard
                 {
                     closed = proc.CloseMainWindow();
                 }
-                catch { }
+                catch { 
+                }
             }
             return closed;
         }
 
-        private void SaveSettingsFromUI() 
+        private void saveSettingsFromUI() 
         {
             if (this.remoteSettingsPage == null) 
             {
@@ -373,30 +404,6 @@ namespace EmercoinDPOSNP.SettingsWizard
         {
             this.DialogResult = false;
             this.Close();
-        }
-
-        public async Task<bool> checkConnectionWithUI(string host, string port, string username, string password, string rootDPOName) 
-        {
-            this.OperationProgress.IsIndeterminate = true;
-            bool success = false;
-            try 
-            {
-                var wallet = new EmercoinWallet(host, port, username, password);
-                string balance = await Task.Run(() => wallet.GetBalance());
-                wallet.LoadRootDPO(rootDPOName);
-                success = true;
-
-                this.StatusTextBlock.Text = "Connected successfully";
-                this.StatusTextBlock.Foreground = this.defaultColor;
-            }
-            catch (EmercoinWalletException ex)
-            {
-                AppUtils.ShowException(ex, this);
-                this.StatusTextBlock.Text = "Connection failed";
-                this.StatusTextBlock.Foreground = this.errorColor;
-            }
-            this.OperationProgress.IsIndeterminate = false;
-            return success;
         }
 
         private bool validateLocalSettingsPage()
@@ -470,12 +477,6 @@ namespace EmercoinDPOSNP.SettingsWizard
             }
 
             return true;
-        }
-
-        private static bool portNumberTextAllowed(string text)
-        {
-            Regex regex = new Regex("[0-9]{1,5}");
-            return regex.IsMatch(text);
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)

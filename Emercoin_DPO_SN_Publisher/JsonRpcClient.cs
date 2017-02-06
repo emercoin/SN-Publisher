@@ -52,8 +52,7 @@
         {
             HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(this.url);
             request.KeepAlive = false;
-            try 
-            {
+            try {
                 request.AllowAutoRedirect = true;
                 request.Method = "POST";
                 request.UserAgent = "Emercoin DPO SN Publisher";
@@ -63,8 +62,7 @@
                 request.Headers.Add("Authorization", "Basic " + encoded);
 
                 string proxyUrl = System.Configuration.ConfigurationManager.AppSettings["DebugProxy"];
-                if (proxyUrl != null)
-                {
+                if (proxyUrl != null) {
                     request.Proxy = new WebProxy(proxyUrl);
                     request.Proxy.Credentials = CredentialCache.DefaultNetworkCredentials;
                 }
@@ -75,16 +73,13 @@
                 request.ContentLength = requestBuffer.Length;
                 request.ContentType = @"application/json";
 
-                using (Stream requestStream = request.GetRequestStream())
-                {
+                using (Stream requestStream = request.GetRequestStream()) {
                     requestStream.Write(requestBuffer, 0, requestBuffer.Length);
                 }
 
-                using (WebResponse response = request.GetResponse())
-                {
+                using (WebResponse response = request.GetResponse()) {
                     byte[] responseBuffer = new byte[response.ContentLength];
-                    using (Stream responseStream = response.GetResponseStream())
-                    {
+                    using (Stream responseStream = response.GetResponseStream()) {
                         responseStream.Read(responseBuffer, 0, (int)response.ContentLength);
                         responseStream.Close();
                     }
@@ -92,7 +87,9 @@
                     return encoding.GetString(responseBuffer);
                 }
             }
-            catch { throw; }
+            catch {
+                throw;
+            }
             finally 
             {
                 request.Abort();

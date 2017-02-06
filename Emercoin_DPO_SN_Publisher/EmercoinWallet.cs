@@ -9,7 +9,7 @@
     using System.Threading.Tasks;
     using Newtonsoft.Json.Linq;
 
-    public class EmercoinWallet
+    internal class EmercoinWallet
     {
         private JsonRpcClient client;
         private string rootDpoAddress;
@@ -234,6 +234,12 @@
                 throw new EmercoinWalletException("Could not name_list", ex);
             }
         }
+    }
+
+    internal class GetInfoResult
+    {
+        public string balance { get; set; }
+        public bool locked { get; set; }
     }
 
     internal class EmercoinWalletException : Exception

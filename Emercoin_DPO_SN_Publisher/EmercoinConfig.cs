@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace EmercoinDPOSNP
+﻿namespace EmercoinDPOSNP
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+
     public class EmercoinConfig
     {
         public const string serverParam = "server";
@@ -15,7 +15,12 @@ namespace EmercoinDPOSNP
         public const string debugParam = "debug";
         public const string portParam = "port";
 
-        public Dictionary<string, EmercoinConfigValue> Parameters = new Dictionary<string, EmercoinConfigValue>();
+        public EmercoinConfig()
+        {
+            this.Parameters = new Dictionary<string, EmercoinConfigValue>();
+        }
+
+        public Dictionary<string, EmercoinConfigValue> Parameters { get; set; }
 
         public string GetParameterValue(string name)
         {

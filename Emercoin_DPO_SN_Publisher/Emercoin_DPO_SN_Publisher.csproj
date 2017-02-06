@@ -68,7 +68,6 @@
     </ApplicationDefinition>
     <Compile Include="AppSettings\Settings.cs" />
     <Compile Include="Encryption.cs" />
-    <Compile Include="GetInfoResult.cs" />
     <Compile Include="SettingsWizard\ConnectionModePage.xaml.cs">
       <DependentUpon>ConnectionModePage.xaml</DependentUpon>
     </Compile>

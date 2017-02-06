@@ -1,22 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-
-namespace EmercoinDPOSNP
+﻿namespace EmercoinDPOSNP
 {
-    // Логика верхнего уровня при обновлении конфиг файла
-    // 1. Читаем все строки из существующего конфига
-    // 2 Если отсутствует, то создаем новый
-    // 3 обновляем некоторые нужные строки-параметры (добавляем, если их нет)
-    // 4 Записываем все строки прочитанного конфига (в т.ч. измененные) в файл
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Text;
+    using System.Text.RegularExpressions;
+    using System.Threading.Tasks;
+
+    // High level logic of config file modification:Логика верхнего уровня при обновлении конфиг файла
+    // 1. If the file does not exist, create a new one;
+    // 2. Reading all the lines of existing config file;
+    // 3. Updating necessary parameters (lines) in the file, adding non-existing ones;
+    // 4. Writing all the lines (incl. updated) into the file.
 
     /// <summary>
-    /// Управляет файлом конфигурации.
-    /// Позволяет читать, обновлять параметры конфигурации
+    /// Class for managing of Emercoin wallet config file. Used to read, write and update the file.
     /// </summary>
     public class EmercoinConfigManager
     {
@@ -31,7 +30,7 @@ namespace EmercoinDPOSNP
         {
             if (File.Exists(filePath))
             {
-                lines = File.ReadAllLines(filePath).ToList();
+                this.lines = File.ReadAllLines(filePath).ToList();
             }
         }
 
@@ -42,8 +41,8 @@ namespace EmercoinDPOSNP
             int lineId = 0;
             foreach (var l in this.lines) 
             {
-                var param = parseLine(l, lineId);
-                if (param != null) 
+                var param = this.parseLine(l, lineId);
+                if (param != null && !config.Parameters.ContainsKey(param.Name)) 
                 {
                     config.Parameters.Add(param.Name, param);
                 }
@@ -77,8 +76,8 @@ namespace EmercoinDPOSNP
             
             foreach (var p in config.Parameters.Values) 
             {
-                // новые значения добавляем в конец списка
-                // старые - изменяем
+                // adding new values into the end of the list
+                // changing existing values
                 if (p.LineId == -1) 
                 {
                     this.lines.Add(p.ToString());
@@ -89,7 +88,16 @@ namespace EmercoinDPOSNP
                 }
             }
 
-            File.WriteAllLines(filePath, lines);
+            File.WriteAllLines(filePath, this.lines);
+        }
+
+        private static string randomString(int length)
+        {
+            var random = new Random();
+
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            return new string(Enumerable.Repeat(chars, length)
+              .Select(s => s[random.Next(s.Length)]).ToArray());
         }
 
         private EmercoinConfigValue parseLine(string line, int lineId) 
@@ -97,7 +105,7 @@ namespace EmercoinDPOSNP
             if (!string.IsNullOrWhiteSpace(line)) 
             {
                 var arr = line.Split(new char[] { '=' });
-                if(arr.Length == 2)
+                if (arr.Length == 2)
                 {
                     string nameStr = arr[0];
                     nameStr = nameStr.TrimStart('\t', ' ');
@@ -113,15 +121,6 @@ namespace EmercoinDPOSNP
             }
 
             return null;
-        }
-
-        private string randomString(int length)
-        {
-            var random = new Random();
-
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            return new string(Enumerable.Repeat(chars, length)
-              .Select(s => s[random.Next(s.Length)]).ToArray());
         }
     }
 }

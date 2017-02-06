@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-
-namespace EmercoinDPOSNP.SettingsWizard
+﻿namespace EmercoinDPOSNP.SettingsWizard
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Text.RegularExpressions;
+    using System.Threading.Tasks;
+
     public class WalletClient
     {
         private EmercoinWallet wallet;
@@ -23,7 +23,6 @@ namespace EmercoinDPOSNP.SettingsWizard
             
             return success;
         }
-
 
         private static bool portNumberTextAllowed(string text)
         {

@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Globalization;
     using System.Linq;
     using System.Text.RegularExpressions;
@@ -10,11 +11,10 @@
     using System.Windows;
     using System.Windows.Input;
     using System.Windows.Media;
+    using EmercoinDPOSNP.AppSettings;
+    using EmercoinDPOSNP.SettingsWizard;
     using Microsoft.Win32;
     using Newtonsoft.Json.Linq;
-    using EmercoinDPOSNP.SettingsWizard;
-    using EmercoinDPOSNP.AppSettings;
-    using System.Diagnostics;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -39,6 +39,17 @@
             StatusTextBlock.Text = string.Empty;
         }
 
+        private static bool portNumberTextAllowed(string text)
+        {
+            Regex regex = new Regex("[0-9]{1,5}");
+            return regex.IsMatch(text);
+        }
+
+        private static int getPercent(int rowNumber, int count)
+        {
+            return count > 0 ? (int)((double)rowNumber / count * 100) : 0;
+        }
+
         private async Task initialValidation()
         {
             //read settings and validate
@@ -46,7 +57,7 @@
             {
                 Settings.ReadSettings();
                 this.settings = Settings.Instance;
-                var connectionOk = await checkConnection();
+                var connectionOk = await this.checkConnection();
                 if (connectionOk) 
                 {
                     StatusTextBlock.Text = "Settings OK";
@@ -64,7 +75,7 @@
                     var wallet = new EmercoinWallet(Settings.Instance.Host, Settings.Instance.Port, Settings.Instance.Username, Settings.Instance.RpcPassword);
                     var walletInfo = await Task.Run(() => wallet.GetWalletInfo());
 
-                    walletLocked = (walletInfo != null && walletInfo.locked);
+                    walletLocked = walletInfo != null && walletInfo.locked;
                 }
                 catch (EmercoinWalletException ex)
                 {
@@ -77,7 +88,7 @@
                 {
                     if (walletLocked)
                     {
-                        await Task.Run(() => wallet.UnlockWallet(Settings.Instance.WalletPassphrase, 100000));
+                        await Task.Run(() => this.wallet.UnlockWallet(Settings.Instance.WalletPassphrase, 100000));
                     }
                 }
                 catch (EmercoinWalletException ex)
@@ -113,20 +124,9 @@
             }
         }
 
-        private static bool portNumberTextAllowed(string text)
-        {
-            Regex regex = new Regex("[0-9]{1,5}");
-            return regex.IsMatch(text);
-        }
-
-        private static int getPercent(int rowNumber, int count)
-        {
-            return count > 0 ? (int)((double)rowNumber / count * 100) : 0;
-        }
-
         private bool validateConnectionSettings()
         {
-            if (settings == null) 
+            if (this.settings == null) 
             {
                 StatusTextBlock.Text = "Check settings";
                 StatusTextBlock.Foreground = this.errorColor;
@@ -342,9 +342,7 @@
 
             MessageBox.Show(
                 this,
-                "Total serial numbers processed: " + stats.Processed + "\n"
-                + "Records you owned before: " + stats.MyNumbers + "\n" 
-                + "New records created: " + stats.NewNumbers, 
+                "Total serial numbers processed: " + stats.Processed + "\n" + "Records you owned before: " + stats.MyNumbers + "\n" + "New records created: " + stats.NewNumbers, 
                 AppUtils.AppName);
         }
 
@@ -392,8 +390,7 @@
 
             MessageBox.Show(
                 this,
-                "Total serial numbers processed: " + stats.Processed + "\n"
-                + "Records signed: " + stats.Signed,
+                "Total serial numbers processed: " + stats.Processed + "\n" + "Records signed: " + stats.Signed,
                 AppUtils.AppName);
         }
 
@@ -464,19 +461,6 @@
             }
         }
 
-        private struct ReservationStats
-        {
-            public int Processed;
-            public int MyNumbers;
-            public int NewNumbers;
-        }
-
-        private struct SigningStats
-        {
-            public int Processed;
-            public int Signed;
-        }
-
         private void defineSettingsBtn_Click(object sender, RoutedEventArgs e)
         {
             var wizardFrm = new SettingsWizardWindow();
@@ -511,8 +495,21 @@
 
         private async void AppWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            await startWalletIfLocal();
-            await initialValidation();
+            await this.startWalletIfLocal();
+            await this.initialValidation();
+        }
+
+        private struct ReservationStats
+        {
+            public int Processed;
+            public int MyNumbers;
+            public int NewNumbers;
+        }
+
+        private struct SigningStats
+        {
+            public int Processed;
+            public int Signed;
         }
     }
 }
