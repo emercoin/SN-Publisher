@@ -1,9 +1,9 @@
 ﻿<Window x:Name="AppWindow" x:Class="EmercoinDPOSNP.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Emercoin DPO SN Publisher" Height="373.087" Width="440.391" ResizeMode="CanMinimize" Closing="AppWindow_Closing" Icon="AppLogo.ico" Loaded="AppWindow_Loaded">
-    <Grid>
-        <Grid Background="#FFE5E5E5" HorizontalAlignment="Left" Height="242" Margin="10,10,0,0" VerticalAlignment="Top" Width="415" ShowGridLines="True">
+        Title="Emercoin DPO SN Publisher" Height="379" Width="440.391" ResizeMode="CanMinimize" Closing="AppWindow_Closing" Icon="AppLogo.ico" Loaded="AppWindow_Loaded">
+    <Grid Margin="0">
+        <Grid Background="#FFE5E5E5" Height="242" Margin="10" VerticalAlignment="Top" ShowGridLines="True">
             <Label Content="CSV file containing serial numbers" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
             <Label Content="Rows in the file:" HorizontalAlignment="Left" Margin="10,59,0,0" VerticalAlignment="Top"/>
             <Label Content="Lifetime of SN record (days)" HorizontalAlignment="Left" Margin="10,90,0,0" VerticalAlignment="Top"/>
@@ -16,19 +16,14 @@
             <Button x:Name="defineSettingsBtn" Content="Settings" HorizontalAlignment="Left" Margin="10,212,0,0" VerticalAlignment="Top" Width="75" Click="defineSettingsBtn_Click"/>
             <Label x:Name="BalanceLabel" Content="Balance:" HorizontalAlignment="Left" Margin="10,181,0,0" VerticalAlignment="Top"/>
         </Grid>
-
-        <!--<TabControl x:Name="SettingsTabs" HorizontalAlignment="Left" Height="231" Margin="10,10,0,0" VerticalAlignment="Top" Width="405">
-            <TabItem Header="Serial numbers">
-                
-            </TabItem>
-        </TabControl>-->
         <Label Content="Progress:" HorizontalAlignment="Left" Margin="10,257,0,0" VerticalAlignment="Top"/>
         <Label x:Name="ProgressLabel" Content="" HorizontalAlignment="Left" Margin="71,257,0,0" VerticalAlignment="Top" Width="150"/>
-        <Button x:Name="CancelBtn" Content="Cancel" HorizontalAlignment="Left" Margin="349,278,0,0" VerticalAlignment="Top" Width="75" IsEnabled="False" Click="CancelBtn_Click"/>
-        <StatusBar Margin="0,306,0,0" VerticalAlignment="Top" Height="28" BorderThickness="0,1,0,0" BorderBrush="Gray">
-            <ProgressBar x:Name="OperationProgress" HorizontalAlignment="Left" VerticalAlignment="Top" Width="424" Height="20"/>
+        <Button x:Name="CancelBtn" Content="Cancel" HorizontalAlignment="Right" Margin="0,0,10,33" VerticalAlignment="Bottom" Width="75" IsEnabled="False" Click="CancelBtn_Click"/>
+        <StatusBar Margin="0" VerticalAlignment="Bottom" Height="28" BorderThickness="0,1,0,0" BorderBrush="Gray" HorizontalContentAlignment="Stretch">
+            <StatusBarItem HorizontalContentAlignment="Stretch">
+                <ProgressBar x:Name="OperationProgress" VerticalAlignment="Top" Height="20" Padding="0"/>
+            </StatusBarItem>
         </StatusBar>
-        <TextBlock x:Name="StatusTextBlock" TextWrapping="Wrap" Text="..." HorizontalAlignment="Left" Margin="20,285,0,50"/>
-
+        <TextBlock x:Name="StatusTextBlock" TextWrapping="Wrap" Text="..." HorizontalAlignment="Left" Margin="10,0,0,36" Width="300" VerticalAlignment="Bottom"/>
     </Grid>
 </Window>
