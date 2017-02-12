@@ -138,26 +138,26 @@
 
             bool walletLocked = true;
             bool pwdChecked = false;
-            try
-            {
-                var wallet = new EmercoinWallet(Settings.Instance.Host, Settings.Instance.Port, Settings.Instance.Username, Settings.Instance.RpcPassword);
-                var walletInfo = await Task.Run(() => wallet.GetWalletInfo());
+            if (connectionOk) {
+                this.saveSettingsFromUI();
 
-                walletLocked = (walletInfo != null && walletInfo.locked) || !string.IsNullOrEmpty(this.remoteSettingsPage.WalletPassphrase.Password);
-                if (walletLocked)
-                {
-                    pwdChecked = await wallet.CheckWalletPassphrase(this.remoteSettingsPage.WalletPassphrase.Password);
+                try {
+                    var wallet = new EmercoinWallet(Settings.Instance.Host, Settings.Instance.Port, Settings.Instance.Username, Settings.Instance.RpcPassword);
+                    var walletInfo = await Task.Run(() => wallet.GetWalletInfo());
+
+                    walletLocked = (walletInfo != null && walletInfo.locked) || !string.IsNullOrEmpty(this.remoteSettingsPage.WalletPassphrase.Password);
+                    if (walletLocked) {
+                        pwdChecked = await wallet.CheckWalletPassphrase(this.remoteSettingsPage.WalletPassphrase.Password);
+                    }
                 }
-            }
-            catch (EmercoinWalletException ex)
-            {
-                AppUtils.ShowException(ex, this);
-            }
+                catch (EmercoinWalletException ex) {
+                    AppUtils.ShowException(ex, this);
+                }
 
-            if (walletLocked && !pwdChecked)
-            {
-                this.StatusTextBlock.Text = "Wallet passphrase check failed";
-                this.StatusTextBlock.Foreground = this.errorColor;
+                if (walletLocked && !pwdChecked) {
+                    this.StatusTextBlock.Text = "Wallet passphrase check failed";
+                    this.StatusTextBlock.Foreground = this.errorColor;
+                }
             }
 
             this.OperationProgress.IsIndeterminate = false;
@@ -167,7 +167,7 @@
 
             if (this.success)
             {
-                this.saveSettingsFromUI();
+                Settings.WriteSettings();
                 this.DialogResult = true;
             }
             else
@@ -175,7 +175,7 @@
                 var promptResult = MessageBox.Show(this, "Settings error. Save settings anyway?", "Save settings", MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (promptResult == MessageBoxResult.Yes)
                 {
-                    this.saveSettingsFromUI();
+                    Settings.WriteSettings();
                     this.DialogResult = true;
                 }
             }
@@ -186,10 +186,12 @@
             this.OperationProgress.IsIndeterminate = true;
             // get the best wallet instance among installed
             var walletApps = WalletInstallInfo.GetInfo();
-            var walletApp = walletApps.OrderBy(i => i.Version).ThenBy(i => i.Bitness).Last();
+            var walletApp = walletApps.Count() > 0 ? walletApps.OrderBy(i => i.Version).ThenBy(i => i.Bitness).Last() : null;
 
             if (walletApp == null)
             {
+                this.StatusTextBlock.Text = "Local wallet not found";
+                this.StatusTextBlock.Foreground = this.errorColor;
                 Process.Start("https://sourceforge.net/projects/emercoin/files/");
                 throw new Exception("There'are no Emercoin Core applications installed on the local machine");
             }
@@ -377,6 +379,11 @@
                 try
                 {
                     closed = proc.CloseMainWindow();
+                    closed = closed && proc.WaitForExit(15000);
+                    if (!proc.HasExited) {
+                        proc.Kill();
+                        proc.WaitForExit(15000);
+                    }
                 }
                 catch { 
                 }
@@ -397,7 +404,6 @@
             Settings.Instance.RpcPassword = this.remoteSettingsPage.RpcPassword.Password;
             Settings.Instance.RootDPOName = this.remoteSettingsPage.RootDPONameText.Text;
             Settings.Instance.WalletPassphrase = this.remoteSettingsPage.WalletPassphrase.Password;
-            Settings.WriteSettings();
         }
 
         private void cancelBtn_Click(object sender, RoutedEventArgs e)
