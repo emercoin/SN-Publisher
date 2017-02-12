@@ -93,7 +93,7 @@
                 }
                 catch (EmercoinWalletException ex)
                 {
-                    StatusTextBlock.Text = "Error while unlocking wallet";
+                    StatusTextBlock.Text = "Could not unlock the configured wallet";
                     StatusTextBlock.Foreground = this.errorColor;
                     AppUtils.ShowException(ex, this);
                 }
@@ -112,14 +112,14 @@
         private async Task startWalletIfLocal() 
         {
             var walletApps = WalletInstallInfo.GetInfo();
-            var wi = walletApps.OrderBy(i => i.Version).ThenBy(i => i.Bitness).Last();
+            if (walletApps.Count() > 0) {
+                var wi = walletApps.OrderBy(i => i.Version).ThenBy(i => i.Bitness).Last();
 
-            if (Settings.Instance.HostIsLocal()) 
-            {
-                if (wi != null && !wi.IsExecuting())
-                {
-                    Process.Start(wi.FilePath);
-                    await Task.Delay(15000);
+                if (Settings.Instance.HostIsLocal()) {
+                    if (wi != null && !wi.IsExecuting()) {
+                        Process.Start(wi.FilePath);
+                        await Task.Delay(15000);
+                    }
                 }
             }
         }

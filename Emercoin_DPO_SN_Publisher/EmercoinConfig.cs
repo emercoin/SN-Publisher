@@ -13,7 +13,7 @@
         public const string userParam = "rpcuser";
         public const string rpcPasswordParam = "rpcpassword";
         public const string debugParam = "debug";
-        public const string portParam = "port";
+        public const string portParam = "rpcport";
 
         public EmercoinConfig()
         {
