@@ -76,12 +76,6 @@
             return success;
         }
 
-        private static bool portNumberTextAllowed(string text)
-        {
-            Regex regex = new Regex("[0-9]{1,5}");
-            return regex.IsMatch(text);
-        }
-
         private void connectionModeLogic() 
         {
             var settings = Settings.Instance;
@@ -115,11 +109,10 @@
         {
             // Check settings
             bool connectionOk = false;
-            var wc = new WalletClient();
             this.OperationProgress.IsIndeterminate = true;
             try
             {
-                connectionOk = await wc.checkConnection(
+                connectionOk = await EmercoinWallet.CheckConnection(
                     this.remoteSettingsPage.HostText.Text,
                     this.remoteSettingsPage.PortNumberText.Text,
                     this.remoteSettingsPage.UsernameText.Text,
@@ -202,7 +195,8 @@
 
             // check emercoin config if correspondes to publisher settings
             bool configValid = conf.ValidateParameters(Settings.Instance.Port, Settings.Instance.Username, Settings.Instance.RpcPassword);
-            bool settingsValid = this.validateSettings(Settings.Instance.Host, Settings.Instance.Port, Settings.Instance.RootDPOName, Settings.Instance.Username, Settings.Instance.RpcPassword);
+            // TODO: what is the purpose of this?
+            bool settingsValid = this.validateSettings(Settings.Instance.Host, Settings.Instance.Port, Settings.Instance.RootDPOName);
             bool dpoNameChanged = !string.Equals(this.localModePage.RootDPONameTextLocal.Text, Settings.Instance.RootDPOName, StringComparison.InvariantCultureIgnoreCase);
 
             if (!configValid || !settingsValid)
@@ -414,9 +408,6 @@
 
         private bool validateLocalSettingsPage()
         {
-            var validIpAddressRegex = new Regex(@"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$");
-            var validHostnameRegex = new Regex(@"^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$");
-
             if (string.IsNullOrWhiteSpace(this.localModePage.RootDPONameTextLocal.Text))
             {
                 this.localModePage.RootDPONameTextLocal.Focus();
@@ -431,11 +422,8 @@
 
         private bool validateRemoteSettingsPage()
         {
-            var validIpAddressRegex = new Regex(@"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$");
-            var validHostnameRegex = new Regex(@"^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$");
-
             string host = this.remoteSettingsPage.HostText.Text;
-            if (!validHostnameRegex.IsMatch(host) && !validIpAddressRegex.IsMatch(host))
+            if (!Checks.HostNameValid(host) && !Checks.IpAddressValid(host))
             {
                 this.remoteSettingsPage.HostText.Focus();
                 this.StatusTextBlock.Text = "Host is invalid";
@@ -443,7 +431,7 @@
                 return false;
             }
 
-            if (!portNumberTextAllowed(this.remoteSettingsPage.PortNumberText.Text))
+            if (!Checks.PortNumberValid(this.remoteSettingsPage.PortNumberText.Text))
             {
                 this.remoteSettingsPage.PortNumberText.Focus();
                 this.StatusTextBlock.Text = "Port number is invalid";
@@ -463,16 +451,14 @@
             return true;
         }
 
-        private bool validateSettings(string host, string port, string rootDPOName, string username, string password)
+        private bool validateSettings(string host, string port, string rootDPOName)
         {
-            var validIpAddressRegex = new Regex(@"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$");
-            var validHostnameRegex = new Regex(@"^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$");
-            if (!validHostnameRegex.IsMatch(host) && !validIpAddressRegex.IsMatch(host))
+            if (!Checks.HostNameValid(host) && !Checks.IpAddressValid(host))
             {
                 return false;
             }
 
-            if (!portNumberTextAllowed(port))
+            if (!Checks.PortNumberValid(port))
             {
                 return false;
             }

@@ -39,12 +39,6 @@
             StatusTextBlock.Text = string.Empty;
         }
 
-        private static bool portNumberTextAllowed(string text)
-        {
-            Regex regex = new Regex("[0-9]{1,5}");
-            return regex.IsMatch(text);
-        }
-
         private static int getPercent(int rowNumber, int count)
         {
             return count > 0 ? (int)((double)rowNumber / count * 100) : 0;
@@ -52,7 +46,7 @@
 
         private async Task initialValidation()
         {
-            //read settings and validate
+            // read settings and validate
             try 
             {
                 Settings.ReadSettings();
@@ -133,16 +127,14 @@
                 return false;
             }
 
-            var validIpAddressRegex = new Regex(@"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$");
-            var validHostnameRegex = new Regex(@"^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$");
-            if (!validHostnameRegex.IsMatch(this.settings.Host) && !validIpAddressRegex.IsMatch(this.settings.Host))
+            if (!Checks.HostNameValid(this.settings.Host) && !Checks.IpAddressValid(this.settings.Host))
             {
                 StatusTextBlock.Text = "Host is invalid. Check settings";
                 StatusTextBlock.Foreground = this.errorColor;
                 return false;
             }
 
-            if (!portNumberTextAllowed(this.settings.Port))
+            if (!Checks.PortNumberValid(this.settings.Port))
             {
                 StatusTextBlock.Text = "Port number is invalid. Check settings";
                 StatusTextBlock.Foreground = this.errorColor;
@@ -444,14 +436,9 @@
             CancelBtn.IsEnabled = false;
         }
 
-        private void PortNumberText_PreviewTextInput(object sender, TextCompositionEventArgs e)
-        {
-            e.Handled = !portNumberTextAllowed(e.Text);
-        }
-
         private void LifetimeText_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            e.Handled = !portNumberTextAllowed(e.Text);
+            e.Handled = !Checks.PortNumberValid(e.Text);
         }
 
         private void AppWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)

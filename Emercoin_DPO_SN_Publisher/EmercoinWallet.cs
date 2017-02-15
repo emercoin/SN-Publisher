@@ -26,6 +26,20 @@
             Created
         }
 
+        public static async Task<bool> CheckConnection(string host, string port, string username, string password, string rootDPOName)
+        {
+            bool success = false;
+
+            // TODO: use wallet.CheckConnection() instead
+            var wallet = new EmercoinWallet(host, port, username, password);
+            string balance = await Task.Run(() => wallet.GetBalance());
+            await Task.Run(() => wallet.LoadRootDPO(rootDPOName));
+
+            // TODO: is this needed?
+            success = true;
+            return success;
+        }
+
         public async Task<bool> CheckConnection(string rootDpoName)
         {
             bool success = false;

@@ -14,15 +14,9 @@
             this.InitializeComponent();
         }
 
-        private static bool portNumberTextAllowed(string text)
-        {
-            Regex regex = new Regex("[0-9]{1,5}");
-            return regex.IsMatch(text);
-        }
-
         private void PortNumberText_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            e.Handled = !portNumberTextAllowed(e.Text);
+            e.Handled = !AppSettings.Checks.PortNumberValid(e.Text);
         }
     }
 }
