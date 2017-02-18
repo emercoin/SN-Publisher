@@ -28,27 +28,21 @@
 
         public static async Task<bool> CheckConnection(string host, string port, string username, string password, string rootDPOName)
         {
-            bool success = false;
-
-            // TODO: use wallet.CheckConnection() instead
             var wallet = new EmercoinWallet(host, port, username, password);
-            string balance = await Task.Run(() => wallet.GetBalance());
-            await Task.Run(() => wallet.LoadRootDPO(rootDPOName));
-
-            // TODO: is this needed?
-            success = true;
-            return success;
+            return await wallet.CheckConnection(rootDPOName);
         }
 
         public async Task<bool> CheckConnection(string rootDpoName)
         {
-            bool success = false;
-
-            string balance = await Task.Run(() => this.GetBalance());
+            try {
+                string balance = await Task.Run(() => this.GetBalance());
+            }
+            catch (EmercoinWalletException ex) {
+                throw new EmercoinWalletException("Could not connect to the wallet");
+            }
             await Task.Run(() => this.LoadRootDPO(rootDpoName));
 
-            success = true;
-            return success;
+            return true;
         }
 
         public async Task<bool> CheckWalletPassphrase(string passphrase) 
@@ -101,7 +95,7 @@
             }
             catch (JsonRpcException ex)
             {
-                throw new EmercoinWalletException("Could not get wallet balance", ex);
+                throw new EmercoinWalletException("Could not get wallet info", ex);
             }
         }
 

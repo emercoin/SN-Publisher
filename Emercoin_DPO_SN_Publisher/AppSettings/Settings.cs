@@ -84,25 +84,16 @@
 
         public static void ReadSettings()
         {
-            try
-            {
+            try {
                 System.Xml.Serialization.XmlSerializer x = new System.Xml.Serialization.XmlSerializer(typeof(Settings));
-                using (var sw = new StreamReader(settingsPath))
-                {
+                using (var sw = new StreamReader(settingsPath)) {
                     Settings obj = x.Deserialize(sw) as Settings;
-                    if (obj != null)
-                    {
+                    if (obj != null) {
                         settings = obj;
-                    }
-                    else
-                    {
-                        throw new Exception("Settings object is null");
                     }
                 }
             }
-            catch (Exception ex)
-            {
-                //throw new Exception("Exception while loading application settings: {0}", ex);
+            catch {
             }
         }
 

@@ -54,11 +54,6 @@
 
         public void FixToActive(EmercoinConfig config) 
         {
-            if (config == null) 
-            {
-                return;
-            }
-
             config.SetParameter(EmercoinConfig.serverParam, "1");
             config.SetParameter(EmercoinConfig.listenParam, "1");
             config.SetParameter(EmercoinConfig.userParam, "rpcemc");

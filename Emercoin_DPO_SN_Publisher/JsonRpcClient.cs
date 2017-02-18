@@ -52,12 +52,12 @@
         {
             HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(this.url);
             request.KeepAlive = false;
-            try {
-                request.AllowAutoRedirect = true;
-                request.Method = "POST";
-                request.UserAgent = "Emercoin DPO SN Publisher";
+            request.AllowAutoRedirect = true;
+            request.Method = "POST";
+            request.UserAgent = "Emercoin DPO SN Publisher";
 
-                request.PreAuthenticate = true;
+            request.PreAuthenticate = true;
+            try {
                 string encoded = System.Convert.ToBase64String(System.Text.Encoding.GetEncoding("ISO-8859-1").GetBytes(this.username + ":" + this.password));
                 request.Headers.Add("Authorization", "Basic " + encoded);
 
@@ -88,11 +88,8 @@
                 }
             }
             catch {
-                throw;
-            }
-            finally 
-            {
                 request.Abort();
+                throw;
             }
         }
     }
