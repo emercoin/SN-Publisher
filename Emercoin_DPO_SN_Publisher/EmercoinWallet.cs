@@ -88,8 +88,10 @@
                 JObject resJson = this.client.SendCommand(command);
                 var res = resJson["result"];
                 string balance = res["balance"].ToObject<string>();
-                string errors = res["errors"].ToObject<string>();
-                bool locked = string.Equals(errors, "Info: Minting suspended due to locked wallet.", StringComparison.InvariantCultureIgnoreCase);
+
+                bool encrypted = res["encrypted"].ToObject<bool>();
+                int unlockedUntil = res["unlocked_until"].ToObject<int>();
+                bool locked = encrypted && unlockedUntil == 0;
 
                 return new GetInfoResult() { balance = balance, locked = locked };
             }
