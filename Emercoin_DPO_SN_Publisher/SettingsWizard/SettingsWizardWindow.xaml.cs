@@ -29,7 +29,7 @@
 
         private Brush defaultColor = new SolidColorBrush(Colors.Black);
         private Brush errorColor = new SolidColorBrush(Colors.Red);
-        private bool success = false;
+        private bool success;
         private bool closeDisabled;
 
         public SettingsWizardWindow()
@@ -51,29 +51,6 @@
             {
                 return this.success;
             }
-        }
-
-        // TODO: is the method used?
-        public async Task<bool> checkConnectionWithUI(string host, string port, string username, string password, string rootDPOName)
-        {
-            this.OperationProgress.IsIndeterminate = true;
-            bool success = false;
-            try {
-                var wallet = new EmercoinWallet(host, port, username, password);
-                string balance = await Task.Run(() => wallet.GetBalance());
-                wallet.LoadRootDPO(rootDPOName);
-                success = true;
-
-                this.StatusTextBlock.Text = "Connected successfully";
-                this.StatusTextBlock.Foreground = this.defaultColor;
-            }
-            catch (EmercoinWalletException ex) {
-                AppUtils.ShowException(ex, this);
-                this.StatusTextBlock.Text = "Connection failed";
-                this.StatusTextBlock.Foreground = this.errorColor;
-            }
-            this.OperationProgress.IsIndeterminate = false;
-            return success;
         }
 
         private void connectionModeLogic() 
@@ -107,9 +84,10 @@
 
         private async Task remoteSettingsLogic() 
         {
+            this.OperationProgress.IsIndeterminate = true;
+
             // Check settings
             bool connectionOk = false;
-            this.OperationProgress.IsIndeterminate = true;
             try
             {
                 connectionOk = await EmercoinWallet.CheckConnection(
@@ -124,18 +102,19 @@
             }
             catch (EmercoinWalletException ex)
             {
-                AppUtils.ShowException(ex, this);
-                this.StatusTextBlock.Text = "Connection failed";
+                this.StatusTextBlock.Text = ex.Message;
                 this.StatusTextBlock.Foreground = this.errorColor;
             }
 
             bool walletLocked = true;
             bool pwdChecked = false;
             if (connectionOk) {
-                this.saveSettingsFromUI();
-
                 try {
-                    var wallet = new EmercoinWallet(Settings.Instance.Host, Settings.Instance.Port, Settings.Instance.Username, Settings.Instance.RpcPassword);
+                    var wallet = new EmercoinWallet(
+                        this.remoteSettingsPage.HostText.Text, 
+                        this.remoteSettingsPage.PortNumberText.Text, 
+                        this.remoteSettingsPage.UsernameText.Text,
+                        this.remoteSettingsPage.RpcPassword.Password);
                     var walletInfo = await Task.Run(() => wallet.GetWalletInfo());
 
                     walletLocked = (walletInfo != null && walletInfo.locked) || !string.IsNullOrEmpty(this.remoteSettingsPage.WalletPassphrase.Password);
@@ -144,7 +123,6 @@
                     }
                 }
                 catch (EmercoinWalletException ex) {
-                    AppUtils.ShowException(ex, this);
                 }
 
                 if (walletLocked && !pwdChecked) {
@@ -160,7 +138,7 @@
 
             if (this.success)
             {
-                Settings.WriteSettings();
+                this.saveSettingsFromUI();
                 this.DialogResult = true;
             }
             else
@@ -168,39 +146,29 @@
                 var promptResult = MessageBox.Show(this, "Settings error. Save settings anyway?", "Save settings", MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (promptResult == MessageBoxResult.Yes)
                 {
-                    Settings.WriteSettings();
+                    this.saveSettingsFromUI();
                     this.DialogResult = true;
                 }
             }
         }
 
-        private async Task localModeLogic() 
+        private async Task localModeLogic()
         {
-            this.OperationProgress.IsIndeterminate = true;
             // get the best wallet instance among installed
             var walletApps = WalletInstallInfo.GetInfo();
             var walletApp = walletApps.Count() > 0 ? walletApps.OrderBy(i => i.Version).ThenBy(i => i.Bitness).Last() : null;
 
-            if (walletApp == null)
-            {
-                this.StatusTextBlock.Text = "Local wallet not found";
-                this.StatusTextBlock.Foreground = this.errorColor;
+            if (walletApp == null) {
                 Process.Start("https://sourceforge.net/projects/emercoin/files/");
-                throw new Exception("There'are no Emercoin Core applications installed on the local machine");
+                throw new SettingsWizardException("No Emercoin Core applications installed on this computer");
             }
 
             var walletConfigPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\" + "Emercoin" + "\\emercoin.conf";
             var confManager = new EmercoinConfigManager(walletConfigPath);
             var conf = confManager.ReadConfig();
 
-            // check emercoin config if correspondes to publisher settings
-            bool configValid = conf.ValidateParameters(Settings.Instance.Port, Settings.Instance.Username, Settings.Instance.RpcPassword);
-            // TODO: what is the purpose of this?
-            bool settingsValid = this.validateSettings(Settings.Instance.Host, Settings.Instance.Port, Settings.Instance.RootDPOName);
-            bool dpoNameChanged = !string.Equals(this.localModePage.RootDPONameTextLocal.Text, Settings.Instance.RootDPOName, StringComparison.InvariantCultureIgnoreCase);
-
-            if (!configValid || !settingsValid)
-            {
+            // check emercoin config if corresponds to publisher settings
+            if (!conf.ValidateParameters(Settings.Instance.Port, Settings.Instance.Username, Settings.Instance.RpcPassword)) {
                 confManager.FixToActive(conf);
                 confManager.WriteConfig(conf, walletConfigPath);
 
@@ -208,43 +176,38 @@
                 Settings.Instance.Port = conf.GetParameterValue(EmercoinConfig.portParam) ?? string.Empty;
                 Settings.Instance.Username = conf.GetParameterValue(EmercoinConfig.userParam) ?? string.Empty;
                 Settings.Instance.RpcPassword = conf.GetParameterValue(EmercoinConfig.rpcPasswordParam) ?? string.Empty;
-                Settings.Instance.RootDPOName = this.localModePage.RootDPONameTextLocal.Text;
-                Settings.Instance.WalletPassphrase = this.localModePage.WalletPassphraseLocal.Password;
                 Settings.WriteSettings();
             }
-            else if (dpoNameChanged)
-            {
+
+            if (!string.Equals(this.localModePage.RootDPONameTextLocal.Text, Settings.Instance.RootDPOName, StringComparison.InvariantCultureIgnoreCase)
+                || Settings.Instance.WalletPassphrase != this.localModePage.WalletPassphraseLocal.Password) {
                 Settings.Instance.RootDPOName = this.localModePage.RootDPONameTextLocal.Text;
+                Settings.Instance.WalletPassphrase = this.localModePage.WalletPassphraseLocal.Password;
                 Settings.WriteSettings();
             }
 
             // restart wallet in order to apply new settings
             bool connectionOk = false;
-            if (walletApp.IsExecuting())
-            {
+            if (walletApp.IsExecuting()) {
                 // test connection
-                var wallet = new EmercoinWallet(Settings.Instance.Host, Settings.Instance.Port, Settings.Instance.Username, Settings.Instance.RpcPassword);
-                
-                try
-                {
-                    connectionOk = await wallet.CheckConnection(this.localModePage.RootDPONameTextLocal.Text);
+                var testWallet = new EmercoinWallet(Settings.Instance.Host, Settings.Instance.Port, Settings.Instance.Username, Settings.Instance.RpcPassword);
+
+                try {
+                    connectionOk = await testWallet.CheckConnection(Settings.Instance.RootDPOName);
                 }
                 catch (EmercoinWalletException ex) {
                 }
 
-                if (!connectionOk)
-                {
+                if (!connectionOk) {
                     this.walletClose(walletApp);
-                    
+
                     // wait and start wallet
                     Action<Task> startNewWallet = (t) =>
                     {
-                        if (walletApp.IsExecuting())
-                        {
-                            throw new Exception("Emercoin wallet wasn't able to close in time");
+                        if (walletApp.IsExecuting()) {
+                            throw new SettingsWizardException("Emercoin wallet wasn't able to close in time");
                         }
-                        else
-                        {
+                        else {
                             Process.Start(walletApp.FilePath);
                         }
                     };
@@ -253,58 +216,36 @@
                     await Task.Delay(15000);
                 }
             }
-            else
-            {
+            else {
                 var proc = await Task.Run(() => Process.Start(walletApp.FilePath));
                 await Task.Delay(15000);
             }
 
-            // test connection
-            try
-            {
-                var wallet = new EmercoinWallet(Settings.Instance.Host, Settings.Instance.Port, Settings.Instance.Username, Settings.Instance.RpcPassword);
+            // test wallet connection again
+            var wallet = new EmercoinWallet(Settings.Instance.Host, Settings.Instance.Port, Settings.Instance.Username, Settings.Instance.RpcPassword);
+            try {
                 connectionOk = await wallet.CheckConnection(Settings.Instance.RootDPOName);
 
                 this.StatusTextBlock.Text = "Connected successfully";
                 this.StatusTextBlock.Foreground = this.defaultColor;
             }
-            catch (EmercoinWalletException ex)
-            {
-                this.StatusTextBlock.Text = "Connection failed";
-                this.StatusTextBlock.Foreground = this.errorColor;
-                throw;
+            catch (EmercoinWalletException ex) {
+                throw new SettingsWizardException("Connection to the local wallet failed");
             }
 
             bool walletLocked = true;
             bool pwdChecked = false;
-            try
-            {
-                var wallet = new EmercoinWallet(Settings.Instance.Host, Settings.Instance.Port, Settings.Instance.Username, Settings.Instance.RpcPassword);
-                var walletInfo = await Task.Run(() => wallet.GetWalletInfo());
+            var walletInfo = await Task.Run(() => wallet.GetWalletInfo());
 
-                walletLocked = (walletInfo != null && walletInfo.locked) || !string.IsNullOrEmpty(this.localModePage.WalletPassphraseLocal.Password);
-                if (walletLocked) 
-                {
-                    pwdChecked = await wallet.CheckWalletPassphrase(this.localModePage.WalletPassphraseLocal.Password);
-
-                    if (pwdChecked)
-                    {
-                        Settings.Instance.WalletPassphrase = this.localModePage.WalletPassphraseLocal.Password;
-                        Settings.WriteSettings();
-                    }
-                    else
-                    {
-                        throw new EmercoinWalletException("Wallet passphrase check failed");
-                    }
+            walletLocked = (walletInfo != null && walletInfo.locked) || !string.IsNullOrEmpty(Settings.Instance.WalletPassphrase);
+            if (walletLocked) {
+                pwdChecked = await wallet.CheckWalletPassphrase(Settings.Instance.WalletPassphrase);
+                if (!pwdChecked) {
+                    throw new SettingsWizardException("Wallet passphrase check failed");
                 }
             }
-            catch (EmercoinWalletException ex) 
-            {
-                this.StatusTextBlock.Text = "Wallet passphrase check failed";
-                this.StatusTextBlock.Foreground = this.errorColor;
-                throw;
-            }
 
+            this.closeDisabled = false;
             this.success = connectionOk && (!walletLocked || pwdChecked);
         }
 
@@ -317,7 +258,6 @@
                 this.success = false;
                 this.nextBtn.IsEnabled = false;
                 this.cancelBtn.IsEnabled = false;
-                bool controlsValid = false;
 
                 // check type of the current page on which logic depends
                 if (frame1.Content is ConnectionModePage)
@@ -327,26 +267,27 @@
                 }
                 else if (frame1.Content is DefineSettingsPage)
                 {
-                    controlsValid = this.validateRemoteSettingsPage();
-
-                    if (controlsValid) 
+                    if (this.validateRemoteSettingsPage()) 
                     {
                         await this.remoteSettingsLogic();
                     }
                 }
                 else if (frame1.Content is LocalModePage)
                 {
-                    controlsValid = this.validateLocalSettingsPage();
-
-                    if (controlsValid) 
+                    if (this.validateLocalSettingsPage()) 
                     {
+                        this.OperationProgress.IsIndeterminate = true;
                         await this.localModeLogic();
                         this.Activate();
-                        this.OperationProgress.IsIndeterminate = false;
-                        this.closeDisabled = false;
                         this.DialogResult = true;
                     }
                 }
+            }
+            catch (SettingsWizardException ex)
+            {
+                this.StatusTextBlock.Text = ex.Message;
+                this.StatusTextBlock.Foreground = this.errorColor;
+                this.DialogResult = false;
             }
             catch (Exception ex)
             {
@@ -398,6 +339,7 @@
             Settings.Instance.RpcPassword = this.remoteSettingsPage.RpcPassword.Password;
             Settings.Instance.RootDPOName = this.remoteSettingsPage.RootDPONameText.Text;
             Settings.Instance.WalletPassphrase = this.remoteSettingsPage.WalletPassphrase.Password;
+            Settings.WriteSettings();
         }
 
         private void cancelBtn_Click(object sender, RoutedEventArgs e)
@@ -451,29 +393,17 @@
             return true;
         }
 
-        private bool validateSettings(string host, string port, string rootDPOName)
-        {
-            if (!Checks.HostNameValid(host) && !Checks.IpAddressValid(host))
-            {
-                return false;
-            }
-
-            if (!Checks.PortNumberValid(port))
-            {
-                return false;
-            }
-
-            if (string.IsNullOrWhiteSpace(rootDPOName))
-            {
-                return false;
-            }
-
-            return true;
-        }
-
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             e.Cancel = this.closeDisabled;
+        }
+
+        private class SettingsWizardException : Exception
+        {
+            public SettingsWizardException(string msg)
+                : base(msg)
+            {
+            }
         }
     }
 }

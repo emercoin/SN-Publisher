@@ -15,6 +15,7 @@
             <TextBox x:Name="LifetimeText" HorizontalAlignment="Left" Margin="172,92,0,0" TextWrapping="Wrap" Text="1000" VerticalAlignment="Top" Width="135" PreviewTextInput="LifetimeText_PreviewTextInput"/>
             <Button x:Name="defineSettingsBtn" Content="Settings" HorizontalAlignment="Left" Margin="10,212,0,0" VerticalAlignment="Top" Width="75" Click="defineSettingsBtn_Click"/>
             <Label x:Name="BalanceLabel" Content="Balance:" HorizontalAlignment="Left" Margin="10,181,0,0" VerticalAlignment="Top"/>
+            <Button x:Name="checkConnectionBtn" Content="Check connection" HorizontalAlignment="Left" Margin="90,212,0,0" VerticalAlignment="Top" Width="110" Click="checkConnectionBtn_Click"/>
         </Grid>
         <Label Content="Progress:" HorizontalAlignment="Left" Margin="10,257,0,0" VerticalAlignment="Top"/>
         <Label x:Name="ProgressLabel" Content="" HorizontalAlignment="Left" Margin="71,257,0,0" VerticalAlignment="Top" Width="150"/>
