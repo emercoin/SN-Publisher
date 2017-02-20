@@ -183,8 +183,9 @@
                 this.wallet = new EmercoinWallet(this.settings.Host, this.settings.Port, this.settings.Username, this.settings.RpcPassword);
                 string balance = await Task.Run(() => this.wallet.GetBalance());
                 this.wallet.LoadRootDPO(this.settings.RootDPOName);
+                
                 BalanceLabel.Content = "Balance: " + balance + " EMC";
-                StatusTextBlock.Text = "Connected successfully";
+                StatusTextBlock.Text = "Connected to the wallet successfully";
                 StatusTextBlock.Foreground = this.defaultColor;
                 success = true;
             }
@@ -479,32 +480,10 @@
             }
         }
 
-        private async Task<bool> checkConnectionWithUI()
-        {
-            this.OperationProgress.IsIndeterminate = true;
-            bool success = false;
-            try
-            {
-                var wallet = new EmercoinWallet(this.settings.Host, this.settings.Port, this.settings.Username, this.settings.RpcPassword);
-                string balance = await Task.Run(() => wallet.GetBalance());
-                wallet.LoadRootDPO(this.settings.RootDPOName);
-                success = true;
-
-                this.StatusTextBlock.Text = "Connected to the wallet successfully";
-                this.StatusTextBlock.Foreground = this.defaultColor;
-            }
-            catch (EmercoinWalletException ex)
-            {
-                this.StatusTextBlock.Text = ex.Message;
-                this.StatusTextBlock.Foreground = this.errorColor;
-            }
-            this.OperationProgress.IsIndeterminate = false;
-            return success;
-        }
-
         private async void checkConnectionBtn_Click(object sender, RoutedEventArgs e)
         {
-            await this.checkConnectionWithUI();
+            this.settings = Settings.Instance;
+            await this.checkConnection();
         }
 
         private async void AppWindow_Loaded(object sender, RoutedEventArgs e)
