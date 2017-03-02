@@ -11,7 +11,7 @@
     {
         public const string SerialColumnName = "SN";
 
-        private const char separator = ';';
+        private const char separator = ',';
 
         private string[] headerRow;
         private List<string[]> rows;
