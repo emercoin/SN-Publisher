@@ -34,13 +34,13 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_0A38878292A943DDB21D61D21E54F297"
+        "OwnerKey" = "8:_C9D6473A1B6D2ED63473057661A18C80"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_C9D6473A1B6D2ED63473057661A18C80"
+        "OwnerKey" = "8:_0A38878292A943DDB21D61D21E54F297"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -145,11 +145,6 @@
             "AssemblyAsmDisplayName" = "8:Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_C9D6473A1B6D2ED63473057661A18C80"
-                    {
-                    "Name" = "8:Newtonsoft.Json.dll"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:Newtonsoft.Json.dll"
             "TargetName" = "8:"
@@ -256,15 +251,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Emercoin DPO SN Publisher"
-        "ProductCode" = "8:{194E557F-30EB-4B00-BBF7-D73691F3B4D5}"
-        "PackageCode" = "8:{B02C2367-1BDD-42A6-8EB8-0339A43060B1}"
+        "ProductCode" = "8:{0AAE040C-45DA-4033-B75F-6E4B3F08843F}"
+        "PackageCode" = "8:{DEC491A3-62F5-4B17-B16B-E588FFC51F8E}"
         "UpgradeCode" = "8:{3CA508A3-786E-4D74-803B-58987C45D67D}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:1.0.12"
+        "ProductVersion" = "8:1.0.16"
         "Manufacturer" = "8:Emercoin"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
