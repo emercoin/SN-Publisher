@@ -1,30 +1,32 @@
 ﻿<Window x:Name="AppWindow" x:Class="EmercoinDPOSNP.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Emercoin DPO SN Publisher" Height="379" Width="440.391" ResizeMode="CanMinimize" Closing="AppWindow_Closing" Icon="AppLogo.ico" Loaded="AppWindow_Loaded">
+        Title="Emercoin DPO SN Publisher" Height="364" Width="440.391" ResizeMode="CanMinimize" Closing="AppWindow_Closing" Icon="AppLogo.ico" Loaded="AppWindow_Loaded">
     <Grid Margin="0">
-        <Grid Background="#FFE5E5E5" Height="242" Margin="10" VerticalAlignment="Top" ShowGridLines="True">
-            <Label Content="CSV file containing serial numbers" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
-            <Label Content="Rows in the file:" HorizontalAlignment="Left" Margin="10,59,0,0" VerticalAlignment="Top"/>
-            <Label Content="Lifetime of SN record (days)" HorizontalAlignment="Left" Margin="10,90,0,0" VerticalAlignment="Top"/>
-            <Button x:Name="ReserveBtn" Content="Reserve serial number records" HorizontalAlignment="Left" Margin="10,131,0,0" VerticalAlignment="Top" Width="377" Click="ReserveBtn_Click" IsEnabled="False"/>
-            <Button x:Name="FillSignBtn" Content="Fill and sign serial number records" HorizontalAlignment="Left" Margin="10,156,0,0" VerticalAlignment="Top" Width="377" Click="FillSignBtn_Click" IsEnabled="False"/>
-            <Button x:Name="BrowseBtn" Content="Browse..." HorizontalAlignment="Left" Margin="312,35,0,0" VerticalAlignment="Top" Width="75" Click="BrowseBtn_Click"/>
-            <TextBox x:Name="CsvFileText" HorizontalAlignment="Left" Margin="10,34,0,0" VerticalAlignment="Top" Width="297" IsReadOnly="True" Height="23" IsReadOnlyCaretVisible="True"/>
-            <Label x:Name="RowsNumberLabel" Content="..." HorizontalAlignment="Left" Margin="108,59,0,0" VerticalAlignment="Top"/>
-            <TextBox x:Name="LifetimeText" HorizontalAlignment="Left" Margin="172,92,0,0" TextWrapping="Wrap" Text="1000" VerticalAlignment="Top" Width="135" PreviewTextInput="LifetimeText_PreviewTextInput"/>
-            <Button x:Name="defineSettingsBtn" Content="Settings" HorizontalAlignment="Left" Margin="10,212,0,0" VerticalAlignment="Top" Width="75" Click="defineSettingsBtn_Click"/>
-            <Label x:Name="BalanceLabel" Content="Balance:" HorizontalAlignment="Left" Margin="10,181,0,0" VerticalAlignment="Top"/>
-            <Button x:Name="checkConnectionBtn" Content="Check connection" HorizontalAlignment="Left" Margin="90,212,0,0" VerticalAlignment="Top" Width="110" Click="checkConnectionBtn_Click"/>
+        <Grid x:Name="SettingsGrid" Margin="0,0,0,291">
+            <Button x:Name="defineSettingsBtn" Content="Publisher settings" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="150" Click="defineSettingsBtn_Click"/>
+            <Button x:Name="checkConnectionBtn" Content="Check wallet connection" HorizontalAlignment="Left" Margin="165,10,0,0" VerticalAlignment="Top" Width="150" Click="checkConnectionBtn_Click"/>
         </Grid>
-        <Label Content="Progress:" HorizontalAlignment="Left" Margin="10,257,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="ProgressLabel" Content="" HorizontalAlignment="Left" Margin="71,257,0,0" VerticalAlignment="Top" Width="150"/>
+        <Label x:Name="BalanceLabel" Content="Balance:" HorizontalAlignment="Left" Margin="10,45,0,0" VerticalAlignment="Top" RenderTransformOrigin="1.396,0.423"/>
+
+        <Grid x:Name="OperationsGrid" Margin="10,76,10,88" Background="{DynamicResource {x:Static SystemColors.MenuBarBrushKey}}">
+            <Label Content="CSV file containing serial numbers" HorizontalAlignment="Left" Margin="10,7,0,0" VerticalAlignment="Top"/>
+            <TextBox x:Name="CsvFileText" HorizontalAlignment="Left" Margin="10,38,0,0" VerticalAlignment="Top" Width="297" IsReadOnly="True" Height="23" IsReadOnlyCaretVisible="True"/>
+            <Button x:Name="BrowseBtn" Content="Browse..." HorizontalAlignment="Left" Margin="312,38,0,0" VerticalAlignment="Top" Width="75" Click="BrowseBtn_Click"/>
+            <Label Content="Rows in the file:" HorizontalAlignment="Left" Margin="10,66,0,0" VerticalAlignment="Top"/>
+            <Label x:Name="RowsNumberLabel" Content="..." HorizontalAlignment="Left" Margin="108,66,0,0" VerticalAlignment="Top"/>
+            <Button x:Name="ReserveBtn" Content="Reserve serial number records" HorizontalAlignment="Left" Margin="10,104,0,0" VerticalAlignment="Top" Width="377" Click="ReserveBtn_Click" IsEnabled="False"/>
+            <Button x:Name="FillSignBtn" Content="Fill and sign serial number records" HorizontalAlignment="Left" Margin="10,131,0,0" VerticalAlignment="Top" Width="377" Click="FillSignBtn_Click" IsEnabled="False"/>
+        </Grid>
+
+        <Label Content="Progress:" HorizontalAlignment="Left" Margin="10,0,0,57" VerticalAlignment="Bottom"/>
+        <Label x:Name="ProgressLabel" Content="" HorizontalAlignment="Left" Margin="10,0,0,57" VerticalAlignment="Bottom" Width="150"/>
+        <TextBlock x:Name="StatusTextBlock" TextWrapping="Wrap" Text="..." HorizontalAlignment="Left" Margin="10,0,0,36" Width="300" VerticalAlignment="Bottom"/>
         <Button x:Name="CancelBtn" Content="Cancel" HorizontalAlignment="Right" Margin="0,0,10,33" VerticalAlignment="Bottom" Width="75" IsEnabled="False" Click="CancelBtn_Click"/>
         <StatusBar Margin="0" VerticalAlignment="Bottom" Height="28" BorderThickness="0,1,0,0" BorderBrush="Gray" HorizontalContentAlignment="Stretch">
             <StatusBarItem HorizontalContentAlignment="Stretch">
                 <ProgressBar x:Name="OperationProgress" VerticalAlignment="Top" Height="20" Padding="0"/>
             </StatusBarItem>
         </StatusBar>
-        <TextBlock x:Name="StatusTextBlock" TextWrapping="Wrap" Text="..." HorizontalAlignment="Left" Margin="10,0,0,36" Width="300" VerticalAlignment="Bottom"/>
     </Grid>
 </Window>

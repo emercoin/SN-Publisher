@@ -4,13 +4,27 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       mc:Ignorable="d" 
-      d:DesignHeight="300" d:DesignWidth="300"
+      d:DesignHeight="300" d:DesignWidth="400"
 	Title="ConnectionMode"
       Name="connectionModePage">
 
-    <Grid>
-        <RadioButton IsChecked="True" Name="localWalletBtn" Content="Local wallet" HorizontalAlignment="Left" Margin="20,70,0,0" VerticalAlignment="Top"/>
-        <RadioButton Name="RemoteWalletBtn" Content="Remote wallet" HorizontalAlignment="Left" Margin="20,100,0,0" VerticalAlignment="Top"/>
-        <TextBlock HorizontalAlignment="Left" Margin="20,20,20,0" TextWrapping="Wrap" Text="Please choose a mode of connection to Emercoin wallet:" VerticalAlignment="Top"/>
+    <Grid Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
+        <GroupBox Header="Emercoin DPO settings" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="92" Width="380">
+            <Grid HorizontalAlignment="Left" Height="71" VerticalAlignment="Top" Width="370" Margin="0,0,-2,0">
+                <Label Content="Root DPO Name" HorizontalAlignment="Left" Margin="10,8,0,0" VerticalAlignment="Top"/>
+                <TextBox x:Name="RootDPONameText" HorizontalAlignment="Left" Height="23" Margin="172,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="188" Text="myname"/>
+                <Label Content="Lifetime of SN record (days)" HorizontalAlignment="Left" Margin="10,36,0,0" VerticalAlignment="Top"/>
+                <TextBox x:Name="LifetimeText" HorizontalAlignment="Left" Margin="172,38,0,0" TextWrapping="Wrap" Text="1000" VerticalAlignment="Top" Width="80" PreviewTextInput="LifetimeText_PreviewTextInput"/>
+            </Grid>
+        </GroupBox>
+        <GroupBox Header="Emercoin wallet connection" HorizontalAlignment="Left" Margin="10,119,0,0" VerticalAlignment="Top" Height="161" Width="380">
+            <Grid HorizontalAlignment="Left" Height="135" Margin="0,0,-2,0" VerticalAlignment="Top" Width="370">
+                <Label Content="Wallet passphrase" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
+                <PasswordBox x:Name="WalletPassphrase" HorizontalAlignment="Left" Margin="127,10,0,0" VerticalAlignment="Top" Width="233" Height="23"/>
+                <Label HorizontalAlignment="Left" Margin="10,51,0,0" Content="Wallet connection setup mode:" VerticalAlignment="Top"/>
+                <RadioButton IsChecked="True" Name="localWalletBtn" Content="Local connection" HorizontalAlignment="Left" Margin="10,82,0,0" VerticalAlignment="Top"/>
+                <RadioButton Name="RemoteWalletBtn" Content="Remote connection" HorizontalAlignment="Left" Margin="10,103,0,0" VerticalAlignment="Top"/>
+            </Grid>
+        </GroupBox>
     </Grid>
 </Page>

@@ -1,7 +1,7 @@
 ﻿<Window x:Class="EmercoinDPOSNP.SettingsWizard.SettingsWizardWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Settings" Height="350" Width="440.391" Closing="Window_Closing" ResizeMode="NoResize">
+        Title="Settings" Height="415" Width="440.391" Closing="Window_Closing" ResizeMode="NoResize">
     <Grid>
         <Frame Name="frame1" Margin="0,0,0,85" NavigationUIVisibility="Hidden"></Frame>
         <Button Name="nextBtn" Content="Next" HorizontalAlignment="Right" Margin="0,0,90,33" VerticalAlignment="Bottom" Width="76" Click="nextBtn_Click"/>

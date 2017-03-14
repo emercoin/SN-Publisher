@@ -36,10 +36,16 @@
         {
             this.InitializeComponent();
 
+            this.StatusTextBlock.Text = string.Empty;
             this.success = false;
             this.conModePage = new ConnectionModePage();
             this.conModePage.localWalletBtn.IsChecked = true;
             this.frame1.Content = this.conModePage;
+
+            Settings.ReadSettings();
+            this.conModePage.RootDPONameText.Text = Settings.Instance.RootDPOName;
+            this.conModePage.LifetimeText.Text = Settings.Instance.DpoLifetime.ToString();
+            this.conModePage.WalletPassphrase.Password = Settings.Instance.WalletPassphrase;
 
             this.remoteSettingsPage = new DefineSettingsPage();
             this.localModePage = new LocalModePage();
@@ -55,15 +61,21 @@
 
         private void connectionModeLogic() 
         {
+            if (!this.validateConnectionModePage()) {
+                return;
+            }
+
             var settings = Settings.Instance;
             this.conModePage = (ConnectionModePage)this.frame1.Content;
+
+            settings.RootDPOName = this.conModePage.RootDPONameText.Text;
+            settings.DpoLifetime = int.Parse(this.conModePage.LifetimeText.Text);
+            settings.WalletPassphrase = this.conModePage.WalletPassphrase.Password;
+            
             if (this.conModePage.localWalletBtn.IsChecked.Value)
             {
                 this.frame1.Content = this.localModePage;
                 this.nextBtn.Content = "Finish";
-
-                this.localModePage.RootDPONameTextLocal.Text = settings.RootDPOName;
-                this.localModePage.WalletPassphraseLocal.Password = settings.WalletPassphrase;
             }
             else if (this.conModePage.RemoteWalletBtn.IsChecked.Value)
             {
@@ -73,8 +85,6 @@
                     this.remoteSettingsPage.PortNumberText.Text = settings.Port;
                     this.remoteSettingsPage.UsernameText.Text = settings.Username;
                     this.remoteSettingsPage.RpcPassword.Password = settings.RpcPassword;
-                    this.remoteSettingsPage.RootDPONameText.Text = settings.RootDPOName;
-                    this.remoteSettingsPage.WalletPassphrase.Password = settings.WalletPassphrase;
                     this.nextBtn.Content = "Finish";
                 }
 
@@ -95,7 +105,7 @@
                     this.remoteSettingsPage.PortNumberText.Text,
                     this.remoteSettingsPage.UsernameText.Text,
                     this.remoteSettingsPage.RpcPassword.Password,
-                    this.remoteSettingsPage.RootDPONameText.Text);
+                    Settings.Instance.RootDPOName);
 
                 this.StatusTextBlock.Text = "Connected successfully";
                 this.StatusTextBlock.Foreground = this.defaultColor;
@@ -117,9 +127,9 @@
                         this.remoteSettingsPage.RpcPassword.Password);
                     var walletInfo = await Task.Run(() => wallet.GetWalletInfo());
 
-                    walletLocked = (walletInfo != null && walletInfo.locked) || !string.IsNullOrEmpty(this.remoteSettingsPage.WalletPassphrase.Password);
+                    walletLocked = (walletInfo != null && walletInfo.locked) || !string.IsNullOrEmpty(Settings.Instance.WalletPassphrase);
                     if (walletLocked) {
-                        pwdChecked = await wallet.CheckWalletPassphrase(this.remoteSettingsPage.WalletPassphrase.Password);
+                        pwdChecked = await wallet.CheckWalletPassphrase(Settings.Instance.WalletPassphrase);
                     }
                 }
                 catch (EmercoinWalletException ex) {
@@ -143,7 +153,7 @@
             }
             else
             {
-                var promptResult = MessageBox.Show(this, "Settings error. Save settings anyway?", "Save settings", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                var promptResult = MessageBox.Show(this, "Configuration check error. Save settings anyway?", "Save settings", MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (promptResult == MessageBoxResult.Yes)
                 {
                     this.saveSettingsFromUI();
@@ -176,13 +186,6 @@
                 Settings.Instance.Port = conf.GetParameterValue(EmercoinConfig.portParam) ?? string.Empty;
                 Settings.Instance.Username = conf.GetParameterValue(EmercoinConfig.userParam) ?? string.Empty;
                 Settings.Instance.RpcPassword = conf.GetParameterValue(EmercoinConfig.rpcPasswordParam) ?? string.Empty;
-                Settings.WriteSettings();
-            }
-
-            if (!string.Equals(this.localModePage.RootDPONameTextLocal.Text, Settings.Instance.RootDPOName, StringComparison.InvariantCultureIgnoreCase)
-                || Settings.Instance.WalletPassphrase != this.localModePage.WalletPassphraseLocal.Password) {
-                Settings.Instance.RootDPOName = this.localModePage.RootDPONameTextLocal.Text;
-                Settings.Instance.WalletPassphrase = this.localModePage.WalletPassphraseLocal.Password;
                 Settings.WriteSettings();
             }
 
@@ -253,7 +256,6 @@
         {
             try 
             {
-                Settings.ReadSettings();
                 this.closeDisabled = true;
                 this.success = false;
                 this.nextBtn.IsEnabled = false;
@@ -274,13 +276,10 @@
                 }
                 else if (frame1.Content is LocalModePage)
                 {
-                    if (this.validateLocalSettingsPage()) 
-                    {
-                        this.OperationProgress.IsIndeterminate = true;
-                        await this.localModeLogic();
-                        this.Activate();
-                        this.DialogResult = true;
-                    }
+                    this.OperationProgress.IsIndeterminate = true;
+                    await this.localModeLogic();
+                    this.Activate();
+                    this.DialogResult = true;
                 }
             }
             catch (SettingsWizardException ex)
@@ -337,8 +336,6 @@
             Settings.Instance.Port = this.remoteSettingsPage.PortNumberText.Text;
             Settings.Instance.Username = this.remoteSettingsPage.UsernameText.Text;
             Settings.Instance.RpcPassword = this.remoteSettingsPage.RpcPassword.Password;
-            Settings.Instance.RootDPOName = this.remoteSettingsPage.RootDPONameText.Text;
-            Settings.Instance.WalletPassphrase = this.remoteSettingsPage.WalletPassphrase.Password;
             Settings.WriteSettings();
         }
 
@@ -348,12 +345,25 @@
             this.Close();
         }
 
-        private bool validateLocalSettingsPage()
+        private bool validateConnectionModePage()
         {
-            if (string.IsNullOrWhiteSpace(this.localModePage.RootDPONameTextLocal.Text))
+            if (string.IsNullOrWhiteSpace(this.conModePage.RootDPONameText.Text))
             {
-                this.localModePage.RootDPONameTextLocal.Focus();
+                this.conModePage.RootDPONameText.Focus();
                 this.StatusTextBlock.Text = "Root DPO name is not configured";
+                this.StatusTextBlock.Foreground = this.errorColor;
+                return false;
+            }
+
+            int lifetime = 0;
+            try {
+                lifetime = int.Parse(this.conModePage.LifetimeText.Text);
+            }
+            catch {
+            }
+            if (lifetime <= 0) {
+                this.conModePage.LifetimeText.Focus();
+                this.StatusTextBlock.Text = "Lifetime is invalid";
                 this.StatusTextBlock.Foreground = this.errorColor;
                 return false;
             }
@@ -377,14 +387,6 @@
             {
                 this.remoteSettingsPage.PortNumberText.Focus();
                 this.StatusTextBlock.Text = "Port number is invalid";
-                this.StatusTextBlock.Foreground = this.errorColor;
-                return false;
-            }
-
-            if (string.IsNullOrWhiteSpace(this.remoteSettingsPage.RootDPONameText.Text))
-            {
-                this.remoteSettingsPage.RootDPONameText.Focus();
-                this.StatusTextBlock.Text = "Root DPO name is not configured";
                 this.StatusTextBlock.Foreground = this.errorColor;
                 return false;
             }

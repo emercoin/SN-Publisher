@@ -13,16 +13,7 @@
     {
         private Settings()
         {
-            this.RootDPOName = string.Empty;
-            this.Host = "localhost";
-            this.Port = "6662";
-            this.Username = string.Empty;
-            this.RpcPassword = string.Empty;
-            this.WalletPassphrase = string.Empty;
-        }
-
-        private Settings(bool loadDefaults)
-        {
+            this.DpoLifetime = 1000;
             this.RootDPOName = "myname";
             this.Host = "localhost";
             this.Port = "6662";
@@ -48,6 +39,7 @@
         public string RpcPassword { get; set; }
         public string RootDPOName { get; set; }
         public string WalletPassphraseEncoded { get; set; }
+        public int DpoLifetime { get; set; }
 
         [XmlIgnore]
         public string WalletPassphrase

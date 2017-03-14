@@ -9,7 +9,6 @@
     using System.Threading;
     using System.Threading.Tasks;
     using System.Windows;
-    using System.Windows.Input;
     using System.Windows.Media;
     using EmercoinDPOSNP.AppSettings;
     using EmercoinDPOSNP.SettingsWizard;
@@ -28,7 +27,6 @@
 
         private EmercoinWallet wallet;
 
-        private int lifetime;
         private CsvData csv;
 
         private CancellationTokenSource tokenSource;
@@ -152,31 +150,15 @@
             return true;
         }
 
-        private bool validateLifetime()
-        {
-            this.lifetime = 0;
-            try {
-                this.lifetime = int.Parse(LifetimeText.Text);
-            }
-            catch {
-            }
-            if (this.lifetime <= 0) {
-                LifetimeText.Focus();
-                StatusTextBlock.Text = "Lifetime is invalid";
-                StatusTextBlock.Foreground = this.errorColor;
-                return false;
-            }
-            return true;
-        }
-
         private async Task<bool> checkConnection()
         {
             if (!this.validateConnectionSettings()) {
                 return false;
             }
 
-            this.OperationProgress.IsIndeterminate = true;
-            defineSettingsBtn.IsEnabled = false;
+            OperationProgress.IsIndeterminate = true;
+            SettingsGrid.IsEnabled = false;
+            OperationsGrid.IsEnabled = false;
 
             bool success = false;
             try {
@@ -194,8 +176,9 @@
                 StatusTextBlock.Foreground = this.errorColor;
             }
 
-            this.OperationProgress.IsIndeterminate = false;
-            defineSettingsBtn.IsEnabled = true;
+            OperationProgress.IsIndeterminate = false;
+            SettingsGrid.IsEnabled = true;
+            OperationsGrid.IsEnabled = true;
             return success;
         }
 
@@ -211,7 +194,7 @@
                 // iterate through unique names
                 for (int j = 0; j < 100; j++) {
                     string nameUnique = name + ":" + j.ToString(CultureInfo.InvariantCulture);
-                    EmercoinWallet.NameCreationStatusEnum result = this.wallet.CreateOrCheckName(nameUnique, this.lifetime);
+                    EmercoinWallet.NameCreationStatusEnum result = this.wallet.CreateOrCheckName(nameUnique, this.settings.DpoLifetime);
                     if (result == EmercoinWallet.NameCreationStatusEnum.Created) {
                         stats.NewNumbers++;
                         break;
@@ -293,14 +276,15 @@
         private async void ReserveBtn_Click(object sender, RoutedEventArgs e)
         {
             bool success = await this.checkConnection();
-            if (!success || !this.validateLifetime()) {
+            if (!success) {
                 return;
             }
 
             this.tokenSource = new CancellationTokenSource();
             CancellationToken ct = this.tokenSource.Token;
             CancelBtn.IsEnabled = true;
-            defineSettingsBtn.IsEnabled = false;
+            SettingsGrid.IsEnabled = false;
+            OperationsGrid.IsEnabled = false;
 
             // The Progress<T> constructor captures our UI context, so the lambda will be run on the UI thread.
             var progress = new Progress<int>(percent =>
@@ -328,7 +312,8 @@
             }
             ProgressLabel.Content = string.Empty;
 
-            defineSettingsBtn.IsEnabled = true;
+            SettingsGrid.IsEnabled = true;
+            OperationsGrid.IsEnabled = true;
             CancelBtn.IsEnabled = false;
             this.tokenSource.Dispose();
 
@@ -341,14 +326,15 @@
         private async void FillSignBtn_Click(object sender, RoutedEventArgs e)
         {
             bool success = await this.checkConnection();
-            if (!success || !this.validateLifetime()) {
+            if (!success) {
                 return;
             }
 
             this.tokenSource = new CancellationTokenSource();
             CancellationToken ct = this.tokenSource.Token;
             CancelBtn.IsEnabled = true;
-            defineSettingsBtn.IsEnabled = false;
+            SettingsGrid.IsEnabled = false;
+            OperationsGrid.IsEnabled = false;
 
             // The Progress<T> constructor captures our UI context, so the lambda will be run on the UI thread.
             var progress = new Progress<int>(percent =>
@@ -376,7 +362,8 @@
             }
             ProgressLabel.Content = string.Empty;
 
-            defineSettingsBtn.IsEnabled = true;
+            SettingsGrid.IsEnabled = true;
+            OperationsGrid.IsEnabled = true;
             CancelBtn.IsEnabled = false;
             this.tokenSource.Dispose();
 
@@ -434,11 +421,6 @@
         {
             this.tokenSource.Cancel();
             CancelBtn.IsEnabled = false;
-        }
-
-        private void LifetimeText_PreviewTextInput(object sender, TextCompositionEventArgs e)
-        {
-            e.Handled = !Checks.PortNumberValid(e.Text);
         }
 
         private void AppWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)

@@ -7,14 +7,12 @@
       d:DesignHeight="300" d:DesignWidth="400"
 	Title="DefineSettingsPage">
 
-    <Grid>
-        <TextBlock HorizontalAlignment="Left" Margin="20,20,0,0" TextWrapping="Wrap" Text="Please provide values for the following settings:" VerticalAlignment="Top"/>
-        <Label Content="Host name / IP" HorizontalAlignment="Left" Margin="20,53,0,0" VerticalAlignment="Top"/>
-        <Label Content="Port number" HorizontalAlignment="Left" Margin="20,83,0,0" VerticalAlignment="Top"/>
-        <Label Content="RPC username" HorizontalAlignment="Left" Margin="20,111,0,0" VerticalAlignment="Top"/>
-        <Label Content="RPC password" HorizontalAlignment="Left" Margin="20,139,0,0" VerticalAlignment="Top"/>
-        <Label Content="Root DPO Name" HorizontalAlignment="Left" Margin="20,167,0,0" VerticalAlignment="Top"/>
-        <Label Content="Wallet password" HorizontalAlignment="Left" Margin="20,195,0,0" VerticalAlignment="Top"/>
+    <Grid Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
+        <TextBlock HorizontalAlignment="Left" Margin="20,20,0,0" TextWrapping="Wrap" Text="Please provide the following wallet connection settings:" VerticalAlignment="Top"/>
+        <Label Content="Host name / IP" HorizontalAlignment="Left" Margin="20,53,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.461,1.091"/>
+        <Label Content="Port number" HorizontalAlignment="Left" Margin="20,81,0,0" VerticalAlignment="Top"/>
+        <Label Content="RPC username" HorizontalAlignment="Left" Margin="20,109,0,0" VerticalAlignment="Top"/>
+        <Label Content="RPC password" HorizontalAlignment="Left" Margin="20,136,0,0" VerticalAlignment="Top"/>
         <TextBox x:Name="HostText" HorizontalAlignment="Left" Margin="123,55,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="249" Text="localhost" Height="23"/>
         <TextBox x:Name="PortNumberText" HorizontalAlignment="Left" Margin="123,83,0,0" TextWrapping="Wrap" Text="6662" VerticalAlignment="Top" Width="249" PreviewTextInput="PortNumberText_PreviewTextInput" Height="23"/>
         <TextBox x:Name="UsernameText" HorizontalAlignment="Left" Margin="123,111,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="249" Text="rpcemc" Height="23">
@@ -22,8 +20,6 @@
                 <BindingGroup/>
             </TextBox.BindingGroup>
         </TextBox>
-        <PasswordBox x:Name="RpcPassword" HorizontalAlignment="Left" Margin="123,139,0,0" VerticalAlignment="Top" Width="249" Height="23"/>
-        <TextBox x:Name="RootDPONameText" HorizontalAlignment="Left" Margin="123,167,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="249" Text="myname" Height="23"/>
-        <PasswordBox x:Name="WalletPassphrase" HorizontalAlignment="Left" Margin="123,195,0,0" VerticalAlignment="Top" Width="249" Height="23"/>
+        <PasswordBox x:Name="RpcPassword" HorizontalAlignment="Left" Margin="123,139,0,0" VerticalAlignment="Top" Width="249" Height="23" Password="dghdfgh"/>
     </Grid>
 </Page>
