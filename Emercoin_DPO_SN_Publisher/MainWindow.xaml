@@ -10,7 +10,7 @@
         <Label x:Name="BalanceLabel" Content="Balance:" HorizontalAlignment="Left" Margin="10,45,0,0" VerticalAlignment="Top" RenderTransformOrigin="1.396,0.423"/>
 
         <Grid x:Name="OperationsGrid" Margin="10,76,10,88" Background="{DynamicResource {x:Static SystemColors.MenuBarBrushKey}}">
-            <Label Content="CSV file containing serial numbers" HorizontalAlignment="Left" Margin="10,7,0,0" VerticalAlignment="Top"/>
+            <Label Content="Excel or CSV file containing serial numbers" HorizontalAlignment="Left" Margin="10,7,0,0" VerticalAlignment="Top"/>
             <TextBox x:Name="CsvFileText" HorizontalAlignment="Left" Margin="10,38,0,0" VerticalAlignment="Top" Width="297" IsReadOnly="True" Height="23" IsReadOnlyCaretVisible="True"/>
             <Button x:Name="BrowseBtn" Content="Browse..." HorizontalAlignment="Left" Margin="312,38,0,0" VerticalAlignment="Top" Width="75" Click="BrowseBtn_Click"/>
             <Label Content="Rows in the file:" HorizontalAlignment="Left" Margin="10,66,0,0" VerticalAlignment="Top"/>

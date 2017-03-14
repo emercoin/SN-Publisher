@@ -27,7 +27,7 @@
 
         private EmercoinWallet wallet;
 
-        private CsvData csv;
+        private SnData snData;
 
         private CancellationTokenSource tokenSource;
 
@@ -187,7 +187,7 @@
             var stats = new ReservationStats();
 
             int i = 0;
-            foreach (string[] row in this.csv.Rows) {
+            foreach (string[] row in this.snData.Rows) {
                 string sn = row[0];
                 string name = this.settings.RootDPOName + ":" + sn;
 
@@ -212,7 +212,7 @@
 
                 i++;
                 if (progress != null) {
-                    progress.Report(getPercent(i, this.csv.Rows.Count));
+                    progress.Report(getPercent(i, this.snData.Rows.Count));
                 }
                 ct.ThrowIfCancellationRequested();
             }
@@ -225,15 +225,15 @@
             var stats = new SigningStats();
 
             var signedColumns = new HashSet<int>();
-            for (int n = 0; n < this.csv.HeaderRow.Length; n++) {
-                string col = this.csv.HeaderRow[n];
+            for (int n = 0; n < this.snData.HeaderRow.Length; n++) {
+                string col = this.snData.HeaderRow[n];
                 if (col.StartsWith("F-")) {
                     signedColumns.Add(n);
                 }
             }
 
             int i = 0;
-            foreach (string[] row in this.csv.Rows) {
+            foreach (string[] row in this.snData.Rows) {
                 string sn = row[0];
                 string name = this.settings.RootDPOName + ":" + sn;
 
@@ -242,8 +242,8 @@
                     if (this.wallet.CheckNameIsMine(nameUnique)) {
                         var record = string.Empty;
                         var messageParts = new List<string>() { nameUnique };
-                        for (int k = 1; k < this.csv.HeaderRow.Length; k++) {
-                            string part = this.csv.HeaderRow[k] + "=" + row[k];
+                        for (int k = 1; k < this.snData.HeaderRow.Length; k++) {
+                            string part = this.snData.HeaderRow[k] + "=" + row[k];
                             record = record + part + "\n";
                             if (signedColumns.Contains(k)) {
                                 messageParts.Add(part);
@@ -265,7 +265,7 @@
 
                 i++;
                 if (progress != null) {
-                    progress.Report(getPercent(i, this.csv.Rows.Count));
+                    progress.Report(getPercent(i, this.snData.Rows.Count));
                 }
                 ct.ThrowIfCancellationRequested();
             }
@@ -381,33 +381,38 @@
 
             var dlg = new OpenFileDialog();
             dlg.CheckFileExists = true;
-            dlg.Filter = "CSV files|*.csv";
+            dlg.Filter = "Excel files|*.xlsx|CSV files|*.csv";
             dlg.AddExtension = true;
-            dlg.DefaultExt = "csv";
+            dlg.DefaultExt = "xlsx";
             dlg.ValidateNames = true;
 
             if (dlg.ShowDialog() != null) {
                 if (!string.IsNullOrEmpty(dlg.FileName)) {
                     try {
-                        this.csv = new CsvData(dlg.FileName);
-                        RowsNumberLabel.Content = this.csv.Rows.Count;
+                        if (dlg.FileName.EndsWith(".xlsx")) {
+                            this.snData = SnData.LoadFromXlsx(dlg.FileName);
+                        }
+                        else {
+                            this.snData = SnData.LoadFromCsv(dlg.FileName);
+                        }
+                        RowsNumberLabel.Content = this.snData.Rows.Count;
                         StatusTextBlock.Text = string.Empty;
                         ReserveBtn.IsEnabled = true;
                         FillSignBtn.IsEnabled = true;
                     }
-                    catch (CsvData.EmptyException) {
+                    catch (SnData.EmptyException) {
                         StatusTextBlock.Text = "File is empty or header row missing";
                         StatusTextBlock.Foreground = this.errorColor;
                     }
-                    catch (CsvData.InconsistentException) {
+                    catch (SnData.InconsistentException) {
                         StatusTextBlock.Text = "Number of values in a data row does not correspond to the header row";
                         StatusTextBlock.Foreground = this.errorColor;
                     }
-                    catch (CsvData.SerialColumnException) {
-                        StatusTextBlock.Text = CsvData.SerialColumnName + " column header missing";
+                    catch (SnData.SerialColumnException) {
+                        StatusTextBlock.Text = SnData.SerialColumnName + " column header missing";
                         StatusTextBlock.Foreground = this.errorColor;
                     }
-                    catch (CsvData.DuplicateSerialException ex) {
+                    catch (SnData.DuplicateSerialException ex) {
                         StatusTextBlock.Text = "Duplicate serial number in the file: " + ex.Message;
                         StatusTextBlock.Foreground = this.errorColor;
                     }
