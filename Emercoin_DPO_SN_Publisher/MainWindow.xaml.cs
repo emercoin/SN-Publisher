@@ -252,7 +252,7 @@
 
                         string signedMessage = this.wallet.SignMessage(string.Join("|", messageParts));
                         record = record + "Signature=" + signedMessage;
-                        this.wallet.UpdateName(nameUnique, record, 1);
+                        this.wallet.UpdateName(nameUnique, record, 1, this.settings.OwnerAddress);
                         stats.Signed++;
                         break;
                     }
@@ -464,12 +464,12 @@
                     StatusTextBlock.Text = "Settings are not configured successfuly";
                     StatusTextBlock.Foreground = this.errorColor;
                 }
+                this.settings = Settings.Instance;
             }
         }
 
         private async void checkConnectionBtn_Click(object sender, RoutedEventArgs e)
         {
-            this.settings = Settings.Instance;
             await this.checkConnection();
         }
 

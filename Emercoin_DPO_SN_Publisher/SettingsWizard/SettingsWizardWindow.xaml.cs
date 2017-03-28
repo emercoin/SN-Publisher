@@ -45,6 +45,7 @@
             Settings.ReadSettings();
             this.conModePage.RootDPONameText.Text = Settings.Instance.RootDPOName;
             this.conModePage.LifetimeText.Text = Settings.Instance.DpoLifetime.ToString();
+            this.conModePage.OwnerAddressText.Text = Settings.Instance.OwnerAddress;
             this.conModePage.WalletPassphrase.Password = Settings.Instance.WalletPassphrase;
 
             this.remoteSettingsPage = new DefineSettingsPage();
@@ -70,6 +71,7 @@
 
             settings.RootDPOName = this.conModePage.RootDPONameText.Text;
             settings.DpoLifetime = int.Parse(this.conModePage.LifetimeText.Text);
+            settings.OwnerAddress = this.conModePage.OwnerAddressText.Text;
             settings.WalletPassphrase = this.conModePage.WalletPassphrase.Password;
             
             if (this.conModePage.localWalletBtn.IsChecked.Value)

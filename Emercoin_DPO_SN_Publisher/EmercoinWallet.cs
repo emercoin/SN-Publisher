@@ -156,11 +156,14 @@
             }
         }
 
-        public void UpdateName(string name, string value, int days)
+        public void UpdateName(string name, string value, int days, string address = null)
         {
             var command = new JObject();
             command["method"] = "name_update";
-            command["params"] = new JArray() { name, value, days, this.rootDpoAddress };
+            if (string.IsNullOrWhiteSpace(address)) {
+                address = this.rootDpoAddress;
+            }
+            command["params"] = new JArray() { name, value, days, address };
 
             try {
                 JObject response = this.client.SendCommand(command);

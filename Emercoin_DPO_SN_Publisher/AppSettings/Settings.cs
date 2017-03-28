@@ -15,6 +15,7 @@
         {
             this.DpoLifetime = 1000;
             this.RootDPOName = "myname";
+            this.OwnerAddress = string.Empty;
             this.Host = "localhost";
             this.Port = "6662";
             this.Username = "rpcemc";
@@ -40,6 +41,7 @@
         public string RootDPOName { get; set; }
         public string WalletPassphraseEncoded { get; set; }
         public int DpoLifetime { get; set; }
+        public string OwnerAddress { get; set; }
 
         [XmlIgnore]
         public string WalletPassphrase

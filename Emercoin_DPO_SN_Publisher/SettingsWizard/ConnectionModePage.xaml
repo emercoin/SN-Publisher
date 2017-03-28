@@ -9,15 +9,17 @@
       Name="connectionModePage">
 
     <Grid Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
-        <GroupBox Header="Emercoin DPO settings" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="92" Width="380">
-            <Grid HorizontalAlignment="Left" Height="71" VerticalAlignment="Top" Width="370" Margin="0,0,-2,0">
+        <GroupBox Header="Emercoin DPO settings" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="114" Width="380">
+            <Grid HorizontalAlignment="Left" Height="94" VerticalAlignment="Top" Width="370" Margin="0,0,-2,-2">
                 <Label Content="Root DPO Name" HorizontalAlignment="Left" Margin="10,8,0,0" VerticalAlignment="Top"/>
-                <TextBox x:Name="RootDPONameText" HorizontalAlignment="Left" Height="23" Margin="172,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="188" Text="myname"/>
-                <Label Content="Lifetime of SN record (days)" HorizontalAlignment="Left" Margin="10,36,0,0" VerticalAlignment="Top"/>
-                <TextBox x:Name="LifetimeText" HorizontalAlignment="Left" Margin="172,38,0,0" TextWrapping="Wrap" Text="1000" VerticalAlignment="Top" Width="80" PreviewTextInput="LifetimeText_PreviewTextInput"/>
+                <TextBox x:Name="RootDPONameText" HorizontalAlignment="Left" Margin="183,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="177" Text="myname" MaxHeight="22"/>
+                <Label Content="Lifetime of SN record (days)" HorizontalAlignment="Left" Margin="10,35,0,0" VerticalAlignment="Top"/>
+                <TextBox x:Name="LifetimeText" HorizontalAlignment="Left" Margin="183,37,0,0" TextWrapping="Wrap" Text="1000" VerticalAlignment="Top" Width="80" PreviewTextInput="LifetimeText_PreviewTextInput" MaxHeight="22"/>
+                <Label Content="Third-party SN owner address" HorizontalAlignment="Left" Margin="10,62,0,0" VerticalAlignment="Top"/>
+                <TextBox x:Name="OwnerAddressText" HorizontalAlignment="Left" Margin="183,64,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="177" MaxHeight="22" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"/>
             </Grid>
         </GroupBox>
-        <GroupBox Header="Emercoin wallet connection" HorizontalAlignment="Left" Margin="10,119,0,0" VerticalAlignment="Top" Height="161" Width="380">
+        <GroupBox Header="Emercoin wallet connection" HorizontalAlignment="Left" Margin="10,129,0,0" VerticalAlignment="Top" Height="161" Width="380">
             <Grid HorizontalAlignment="Left" Height="135" Margin="0,0,-2,0" VerticalAlignment="Top" Width="370">
                 <Label Content="Wallet passphrase" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
                 <PasswordBox x:Name="WalletPassphrase" HorizontalAlignment="Left" Margin="127,10,0,0" VerticalAlignment="Top" Width="233" Height="23"/>
